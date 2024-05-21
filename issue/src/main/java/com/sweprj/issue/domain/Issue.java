@@ -15,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class Issue {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String title;
     private String description;
 
@@ -35,7 +35,5 @@ public class Issue {
     private Project project;
 
     private Date reportedAt;
-
-    // Getters and setters
 
 }

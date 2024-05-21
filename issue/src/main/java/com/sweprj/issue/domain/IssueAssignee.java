@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class IssueAssignee {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "issue_id", nullable = false)

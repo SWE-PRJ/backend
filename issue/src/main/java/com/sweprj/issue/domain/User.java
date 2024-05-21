@@ -1,10 +1,18 @@
 package com.sweprj.issue.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Entity
+@Data
+@NoArgsConstructor
+@RequiredArgsConstructor
+@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class User {
@@ -26,4 +34,7 @@ public abstract class User {
 
     @OneToMany(mappedBy = "commenter")
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "user")
+    private List<ProjectUser> projects;
 }
