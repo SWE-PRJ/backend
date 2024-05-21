@@ -1,5 +1,6 @@
 package com.sweprj.issue.domain;
 
+import com.sweprj.issue.domain.enums.IssueState;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,7 +29,9 @@ public class Issue {
     private User fixer;
 
     private String priority;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private IssueState state;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
