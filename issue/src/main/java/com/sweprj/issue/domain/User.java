@@ -8,11 +8,11 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
-public abstract class User {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -29,8 +29,8 @@ public abstract class User {
     @OneToMany(mappedBy = "assignee")
     private List<IssueAssignee> assignedIssues;
 
-    @OneToMany(mappedBy = "commenter")
-    private List<Comment> comments;
+//    @OneToMany(mappedBy = "commenter")
+//    private List<Comment> comments;
 
     @OneToMany(mappedBy = "user")
     private List<ProjectUser> projects;
