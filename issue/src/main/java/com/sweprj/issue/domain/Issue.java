@@ -11,7 +11,6 @@ import java.util.Date;
 @Entity
 @Data
 @NoArgsConstructor
-@RequiredArgsConstructor
 @AllArgsConstructor
 public class Issue {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
