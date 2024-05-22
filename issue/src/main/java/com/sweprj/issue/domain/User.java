@@ -1,15 +1,13 @@
 package com.sweprj.issue.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -17,7 +15,7 @@ import java.util.List;
 public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    private Long userId;
 
     @Column(nullable = false)
     private String name;
@@ -36,4 +34,11 @@ public abstract class User {
 
     @OneToMany(mappedBy = "user")
     private List<ProjectUser> projects;
+
+    @Builder
+    public User(String name, String identifier, String password) {
+        this.name = name;
+        this.identifier = identifier;
+        this.password = password;
+    }
 }
