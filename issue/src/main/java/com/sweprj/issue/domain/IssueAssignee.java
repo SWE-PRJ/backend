@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
-@RequiredArgsConstructor
 @AllArgsConstructor
 public class IssueAssignee {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
