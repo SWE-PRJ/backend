@@ -46,7 +46,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public Map<String, Object> login(UserLogInRequest dto) {
 
-        Optional<User> optionalUser = userRepository.findByName(dto.getIdentifier());
+        Optional<User> optionalUser = userRepository.findByIdentifier(dto.getIdentifier());
 
         // name이 일치하는 Member가 없는 경우
         if (optionalUser.isEmpty()) {
@@ -93,7 +93,7 @@ public class UserService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String memberName) throws UsernameNotFoundException {
-        User member = userRepository.findByName(memberName)
+        User member = userRepository.findByIdentifier(memberName)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
 
         System.out.println("loadUserByUsername 유저 찾음: " + member);
