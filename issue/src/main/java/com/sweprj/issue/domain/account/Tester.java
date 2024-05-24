@@ -11,6 +11,10 @@ public class Tester extends User {
         super(name, identifier, password);
     }
 
+    public Tester() {
+
+    }
+
     @Override
     public String getRole() {
         return "ROLE_TESTER";

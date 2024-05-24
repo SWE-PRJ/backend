@@ -11,6 +11,10 @@ public class ProjectLeader extends User {
         super(name, identifier, password);
     }
 
+    public ProjectLeader() {
+
+    }
+
     @Override
     public String getRole() {
         return "ROLE_PL";

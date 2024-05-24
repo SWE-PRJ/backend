@@ -11,6 +11,10 @@ public class Developer extends User {
         super(name, identifier, password);
     }
 
+    public Developer() {
+
+    }
+
     @Override
     public String getRole() {
         return "ROLE_DEV";

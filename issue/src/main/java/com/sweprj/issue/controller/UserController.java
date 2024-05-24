@@ -21,9 +21,9 @@ public class UserController {
     private final UserService userService;
 
     //회원가입
-    @PostMapping("/signup")
-    public ResponseEntity<Map<String, Object>> signup(@Valid @RequestBody UserSignInRequest request, @RequestParam String role) {
-        Long id = userService.signup(request, role);
+    @PostMapping("/admin/signup")
+    public ResponseEntity<Map<String, Object>> signup(@Valid @RequestBody UserSignInRequest request, @RequestParam String role, @RequestParam String adminIdentifier) {
+        Long id = userService.signup(request, role, adminIdentifier);
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
         return ResponseEntity.created(null).body(response);

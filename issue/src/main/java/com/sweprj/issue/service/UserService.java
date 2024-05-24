@@ -10,6 +10,7 @@ import com.sweprj.issue.dto.UserLogInRequest;
 import com.sweprj.issue.dto.UserSignInRequest;
 import com.sweprj.issue.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -35,34 +36,65 @@ public class UserService implements UserDetailsService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
+    //admin 전용 회원가입
     @Transactional
-    public Long signup(UserSignInRequest dto, String role) {
-        // 1. dto -> entity 변환
-        // 2. repository의 save 메서드 호출
-        String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        User user;
+    public Long signup(UserSignInRequest dto, String role, String adminIdentifier) {
+        User adminUser = userRepository.findByIdentifier(adminIdentifier)
+                .orElseThrow(() -> new IllegalArgumentException("Admin user not found"));
 
+        if (!adminUser.getRole().equals("ROLE_ADMIN")) {
+            throw new AccessDeniedException("Only admin can register users");
+        }
+
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        User user = createUserByRole(dto.getName(), dto.getIdentifier(), encodedPassword, role);
+
+        return userRepository.save(user).getUserId();
+    }
+
+    private User createUserByRole(String name, String identifier, String password, String role) {
         switch (role.toLowerCase()) {
             case "admin":
-                user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);
-                break;
+                return new Admin(name, identifier, password);
             case "pl":
-                user = new ProjectLeader(dto.getName(), dto.getIdentifier(), encodedPassword);
-                break;
+                return new ProjectLeader(name, identifier, password);
             case "dev":
-                user = new Developer(dto.getName(), dto.getIdentifier(), encodedPassword);
-                break;
+                return new Developer(name, identifier, password);
             case "tester":
-                user = new Tester(dto.getName(), dto.getIdentifier(), encodedPassword);
-                break;
+                return new Tester(name, identifier, password);
             default:
                 throw new IllegalArgumentException("Invalid role: " + role);
         }
-
-//        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
-        return userRepository.save(user).getUserId();
-        // repository의 save 메서드 호출 (조건. entity 객체를 넘겨줘야 함)
     }
+
+//    @Transactional
+//    public Long signup(UserSignInRequest dto, String role) {
+//        // 1. dto -> entity 변환
+//        // 2. repository의 save 메서드 호출
+//        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+//        User user;
+//
+//        switch (role.toLowerCase()) {
+//            case "admin":
+//                user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);
+//                break;
+//            case "pl":
+//                user = new ProjectLeader(dto.getName(), dto.getIdentifier(), encodedPassword);
+//                break;
+//            case "dev":
+//                user = new Developer(dto.getName(), dto.getIdentifier(), encodedPassword);
+//                break;
+//            case "tester":
+//                user = new Tester(dto.getName(), dto.getIdentifier(), encodedPassword);
+//                break;
+//            default:
+//                throw new IllegalArgumentException("Invalid role: " + role);
+//        }
+//
+////        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
+//        return userRepository.save(user).getUserId();
+//        // repository의 save 메서드 호출 (조건. entity 객체를 넘겨줘야 함)
+//    }
 
     /**
      * 로그인
