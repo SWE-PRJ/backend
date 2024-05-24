@@ -38,7 +38,7 @@ public class UserService implements UserDetailsService {
 
     //admin 전용 회원가입
     @Transactional
-    public Long signup(UserSignInRequest dto, String role, String adminIdentifier) {
+    public Long register(UserSignInRequest dto, String role, String adminIdentifier) {
         User adminUser = userRepository.findByIdentifier(adminIdentifier)
                 .orElseThrow(() -> new IllegalArgumentException("Admin user not found"));
 
@@ -67,34 +67,18 @@ public class UserService implements UserDetailsService {
         }
     }
 
-//    @Transactional
-//    public Long signup(UserSignInRequest dto, String role) {
-//        // 1. dto -> entity 변환
-//        // 2. repository의 save 메서드 호출
-//        String encodedPassword = passwordEncoder.encode(dto.getPassword());
-//        User user;
-//
-//        switch (role.toLowerCase()) {
-//            case "admin":
-//                user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);
-//                break;
-//            case "pl":
-//                user = new ProjectLeader(dto.getName(), dto.getIdentifier(), encodedPassword);
-//                break;
-//            case "dev":
-//                user = new Developer(dto.getName(), dto.getIdentifier(), encodedPassword);
-//                break;
-//            case "tester":
-//                user = new Tester(dto.getName(), dto.getIdentifier(), encodedPassword);
-//                break;
-//            default:
-//                throw new IllegalArgumentException("Invalid role: " + role);
-//        }
-//
-////        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
-//        return userRepository.save(user).getUserId();
-//        // repository의 save 메서드 호출 (조건. entity 객체를 넘겨줘야 함)
-//    }
+    @Transactional
+    public Long signup(UserSignInRequest dto, String role) {
+        // 1. dto -> entity 변환
+        // 2. repository의 save 메서드 호출
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        User user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);;
+
+
+//        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
+        return userRepository.save(user).getUserId();
+        // repository의 save 메서드 호출 (조건. entity 객체를 넘겨줘야 함)
+    }
 
     /**
      * 로그인
