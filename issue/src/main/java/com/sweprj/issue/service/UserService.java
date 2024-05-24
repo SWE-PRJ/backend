@@ -2,6 +2,10 @@ package com.sweprj.issue.service;
 
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.domain.User;
+import com.sweprj.issue.domain.account.Admin;
+import com.sweprj.issue.domain.account.Developer;
+import com.sweprj.issue.domain.account.ProjectLeader;
+import com.sweprj.issue.domain.account.Tester;
 import com.sweprj.issue.dto.UserLogInRequest;
 import com.sweprj.issue.dto.UserSignInRequest;
 import com.sweprj.issue.repository.UserRepository;
@@ -32,11 +36,31 @@ public class UserService implements UserDetailsService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Transactional
-    public Long signup(UserSignInRequest dto) {
+    public Long signup(UserSignInRequest dto, String role) {
         // 1. dto -> entity 변환
         // 2. repository의 save 메서드 호출
-        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
-        return userRepository.save(userEntity).getUserId();
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        User user;
+
+        switch (role.toLowerCase()) {
+            case "admin":
+                user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);
+                break;
+            case "pl":
+                user = new ProjectLeader(dto.getName(), dto.getIdentifier(), encodedPassword);
+                break;
+            case "dev":
+                user = new Developer(dto.getName(), dto.getIdentifier(), encodedPassword);
+                break;
+            case "tester":
+                user = new Tester(dto.getName(), dto.getIdentifier(), encodedPassword);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid role: " + role);
+        }
+
+//        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
+        return userRepository.save(user).getUserId();
         // repository의 save 메서드 호출 (조건. entity 객체를 넘겨줘야 함)
     }
 
@@ -92,11 +116,11 @@ public class UserService implements UserDetailsService {
      */
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String memberName) throws UsernameNotFoundException {
-        User member = userRepository.findByIdentifier(memberName)
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user = userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
 
-        System.out.println("loadUserByUsername 유저 찾음: " + member);
-        return member;
+        System.out.println("loadUserByUsername 유저 찾음: " + user);
+        return user;
     }
 }

@@ -14,10 +14,9 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
-public class User implements UserDetails {
+@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING)
+public abstract class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -41,7 +40,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<ProjectUser> projects;
 
-    @Builder
+
     public User(String name, String identifier, String password) {
         this.name = name;
         this.identifier = identifier;
@@ -82,4 +81,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;    // true: 활성화
     }
+
+    public abstract String getRole();
 }
