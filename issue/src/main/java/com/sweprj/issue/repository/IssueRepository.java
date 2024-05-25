@@ -8,11 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProjectIssueRepository extends JpaRepository<Issue, Long> {
-
-    Issue getIssueById(Long id);
-
-    List<Issue> getIssuesByProjectAndState(Project project, String state);
+public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     List<Issue> getIssuesByProject(Project project);
 }
