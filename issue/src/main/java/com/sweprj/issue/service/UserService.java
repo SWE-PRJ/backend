@@ -125,6 +125,10 @@ public class UserService implements UserDetailsService {
     public User getUser(Long id) {
         return userRepository.findById(id).orElse(null);
     }
+  
+    public User findById(Long id) {
+        return userRepository.findUserByUserId(id);
+    }
 
 
     /**
