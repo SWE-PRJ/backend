@@ -68,6 +68,7 @@ public class IssueController {
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
+        System.out.println(issueStateRequestDTO.getState());
         return ResponseEntity.ok(issueService.setIssueState(id, issueStateRequestDTO));
     }
 }

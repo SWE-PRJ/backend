@@ -96,11 +96,13 @@ public class IssueService {
 
     //이슈 상태 변경
     public IssueResponseDTO setIssueState(Long id, IssueStateRequestDTO issueStateRequestDTO) {
+        Issue issue = issueRepository.getById(id);
         try {
-            issueRepository.getById(id).setState(issueStateRequestDTO.getState());
+            issue.setState(issueStateRequestDTO.getState());
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         }
+        issueRepository.save(issue); // 변경된 상태 저장
 
         return new IssueResponseDTO(issueRepository.getById(id));
     }
