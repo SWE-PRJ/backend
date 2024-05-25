@@ -2,10 +2,15 @@ package com.sweprj.issue.service;
 
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.domain.User;
+import com.sweprj.issue.domain.account.Admin;
+import com.sweprj.issue.domain.account.Developer;
+import com.sweprj.issue.domain.account.ProjectLeader;
+import com.sweprj.issue.domain.account.Tester;
 import com.sweprj.issue.dto.UserLogInRequest;
 import com.sweprj.issue.dto.UserSignInRequest;
 import com.sweprj.issue.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -31,12 +36,47 @@ public class UserService implements UserDetailsService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
+    //admin 전용 회원가입
     @Transactional
-    public Long signup(UserSignInRequest dto) {
+    public Long register(UserSignInRequest dto, String role, String adminIdentifier) {
+        User adminUser = userRepository.findByIdentifier(adminIdentifier)
+                .orElseThrow(() -> new IllegalArgumentException("Admin user not found"));
+
+        if (!adminUser.getRole().equals("ROLE_ADMIN")) {
+            throw new AccessDeniedException("Only admin can register users");
+        }
+
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        User user = createUserByRole(dto.getName(), dto.getIdentifier(), encodedPassword, role);
+
+        return userRepository.save(user).getUserId();
+    }
+
+    private User createUserByRole(String name, String identifier, String password, String role) {
+        switch (role.toLowerCase()) {
+            case "admin":
+                return new Admin(name, identifier, password);
+            case "pl":
+                return new ProjectLeader(name, identifier, password);
+            case "dev":
+                return new Developer(name, identifier, password);
+            case "tester":
+                return new Tester(name, identifier, password);
+            default:
+                throw new IllegalArgumentException("Invalid role: " + role);
+        }
+    }
+
+    @Transactional
+    public Long signup(UserSignInRequest dto, String role) {
         // 1. dto -> entity 변환
         // 2. repository의 save 메서드 호출
-        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
-        return userRepository.save(userEntity).getUserId();
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        User user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);;
+
+
+//        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
+        return userRepository.save(user).getUserId();
         // repository의 save 메서드 호출 (조건. entity 객체를 넘겨줘야 함)
     }
 
@@ -92,11 +132,11 @@ public class UserService implements UserDetailsService {
      */
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String memberName) throws UsernameNotFoundException {
-        User member = userRepository.findByIdentifier(memberName)
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user = userRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
 
-        System.out.println("loadUserByUsername 유저 찾음: " + member);
-        return member;
+        System.out.println("loadUserByUsername 유저 찾음: " + user);
+        return user;
     }
 }
