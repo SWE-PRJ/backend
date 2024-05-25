@@ -1,8 +1,11 @@
 package com.sweprj.issue.service;
 
-import com.sweprj.issue.domain.Developer;
+import com.sweprj.issue.DTO.IssueRequestDTO;
+import com.sweprj.issue.DTO.IssueResponseDTO;
+import com.sweprj.issue.DTO.IssueStateRequestDTO;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.IssueAssignee;
+import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.enums.IssueState;
 import com.sweprj.issue.repository.IssueAssigneeRepository;
 import com.sweprj.issue.repository.IssueRepository;
@@ -11,8 +14,8 @@ import com.sweprj.issue.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class IssueService {
@@ -30,57 +33,75 @@ public class IssueService {
     }
 
     //이슈 생성
-    public Issue createIssue(Issue issue) {
-        return issueRepository.save(issue);
-    }
-
-    public Issue createIssue(Long projectId, String title, String description) {
+    public IssueResponseDTO createIssue(Long projectId, User reporter, IssueRequestDTO issueRequestDTO) {
         Issue issue = new Issue();
+
+        issue.setTitle(issueRequestDTO.getTitle());
+        issue.setDescription(issueRequestDTO.getDescription());
+        issue.setReporter(reporter);
+        issue.setPriority(issueRequestDTO.getPriority());
         issue.setProject(projectRepository.getById(projectId));
-        issue.setTitle(title);
-        issue.setDescription(description);
-        return issueRepository.save(issue);
+        issue.setReportedAt(new Date());
+
+        issueRepository.save(issue);
+
+        return new IssueResponseDTO(issue);
     }
 
     //모든 이슈 검색
-    public List<Issue> findAll() {
-        return issueRepository.findAll();
+    public List<IssueResponseDTO> findAll() {
+        List<IssueResponseDTO> issueResponseDTOS = new ArrayList<>();
+        List<Issue> issues = issueRepository.findAll();
+
+        for (int i = 0; i < issues.size(); i++) {
+            issueResponseDTOS.add(new IssueResponseDTO(issues.get(i)));
+        }
+
+        return issueResponseDTOS;
     }
 
     //이슈 상세정보 확인
+    public IssueResponseDTO findDTOById(Long id) {
+        return new IssueResponseDTO(issueRepository.getById(id));
+    }
+
     public Issue findById(Long id) {
         return issueRepository.getById(id);
     }
 
+
     //프로젝트 전체 이슈 검색
-    public List<Issue> findByProject(Long projectId) {
-        return issueRepository.getIssuesByProject(projectRepository.getById(projectId));
+    public List<IssueResponseDTO> findByProject(Long projectId) {
+        List<IssueResponseDTO> issueResponseDTOS = new ArrayList<>();
+        List<Issue> issues = issueRepository.getIssuesByProject(projectRepository.getById(projectId));
+
+        for (int i = 0; i < issues.size(); i++) {
+            issueResponseDTOS.add(new IssueResponseDTO(issues.get(i)));
+        }
+
+        return issueResponseDTOS;
     }
 
     //할당된 이슈 검색
-    public List<Issue> findIssueAssignedTo(Long userId) { //user가 developer가 맞는지 확인하는 과정 필요
-        List<IssueAssignee>  issueAssigneeList = issueAssigneeRepository.getIssueAssigneesByAssignee(userRepository.findUserByUserId(userId));
-        List<Issue> issueList = new ArrayList<>();
+    public List<IssueResponseDTO> findIssueAssignedTo(Long userId) { //user가 developer가 맞는지 확인하는 과정 필요
+        List<IssueResponseDTO> issueResponseDTOS = new ArrayList<>();
+        List<IssueAssignee>  issueAssignees = issueAssigneeRepository.getIssueAssigneesByAssignee(userRepository.findUserByUserId(userId));
 
-        for (Integer i = 0; i < issueAssigneeList.size(); i++) {
-            issueList.add(issueAssigneeList.get(0).getIssue());
+        for (int i = 0; i < issueAssignees.size(); i++) {
+            issueResponseDTOS.add(new IssueResponseDTO(issueAssignees.get(0).getIssue()));
         }
 
-        return issueList;
+        return issueResponseDTOS;
     }
 
     //이슈 상태 변경
-    public Issue setIssueState(Long id, String stateString) {
-        Issue issue = issueRepository.getById(id);
-
+    public IssueResponseDTO setIssueState(Long id, IssueStateRequestDTO issueStateRequestDTO) {
         try {
-            IssueState state = IssueState.fromString(stateString);
-            issue.setState(state);
-            System.out.println("State set to: " + issue.getState());
+            issueRepository.getById(id).setState(issueStateRequestDTO.getState());
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         }
 
-        return issue;
+        return new IssueResponseDTO(issueRepository.getById(id));
     }
 }

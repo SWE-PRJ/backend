@@ -6,13 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Transactional
 public class Issue {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,7 +33,8 @@ public class Issue {
     private String priority;
 
     @Enumerated(EnumType.STRING)
-    private IssueState state;
+    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'NEW'")
+    private IssueState state = IssueState.NEW;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
@@ -38,4 +42,6 @@ public class Issue {
 
     private Date reportedAt;
 
+    @OneToMany(mappedBy = "issue")
+    private List<Comment> comments;
 }
