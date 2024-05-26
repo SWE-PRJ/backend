@@ -9,8 +9,8 @@
     include: secret
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/issue?createDatabaseIfNotExist=true
-    username: root
+    url: ${database-url}
+    username: ${database-username}
     password: ${database-password}
 
   jpa:
@@ -24,8 +24,3 @@
 
   main:
     allow-bean-definition-overriding: true
-
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
