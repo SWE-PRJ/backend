@@ -3,6 +3,7 @@ package com.sweprj.issue.controller;
 import com.sweprj.issue.DTO.IssueRequestDTO;
 import com.sweprj.issue.DTO.IssueResponseDTO;
 import com.sweprj.issue.DTO.IssueStateRequestDTO;
+import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.service.IssueService;
@@ -11,9 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Controller
 @RequestMapping("/api")
@@ -70,5 +72,27 @@ public class IssueController {
         }
         System.out.println(issueStateRequestDTO.getState());
         return ResponseEntity.ok(issueService.setIssueState(id, issueStateRequestDTO));
+    }
+
+    @GetMapping("/projects/{projectId}/issues/statistics")
+    public ResponseEntity<IssueStatisticsDTO> getIssueStatistics(@PathVariable Long projectId) {
+        IssueStatisticsDTO stats = issueService.getIssueStatistics(projectId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/projects/{projectId}/issues/statistics/daily")
+    public ResponseEntity<IssueStatisticsDTO> getDailyIssueStatistics(
+            @PathVariable Long projectId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date start = formatter.parse(startDate);
+            Date end = formatter.parse(endDate);
+            IssueStatisticsDTO stats = issueService.getDailyIssueStatistics(projectId, start, end);
+            return ResponseEntity.ok(stats);
+        } catch (ParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

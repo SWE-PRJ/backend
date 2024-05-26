@@ -3,19 +3,17 @@ package com.sweprj.issue.service;
 import com.sweprj.issue.DTO.IssueRequestDTO;
 import com.sweprj.issue.DTO.IssueResponseDTO;
 import com.sweprj.issue.DTO.IssueStateRequestDTO;
+import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.IssueAssignee;
 import com.sweprj.issue.domain.User;
-import com.sweprj.issue.domain.enums.IssueState;
 import com.sweprj.issue.repository.IssueAssigneeRepository;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
 import com.sweprj.issue.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class IssueService {
@@ -105,5 +103,43 @@ public class IssueService {
         issueRepository.save(issue); // 변경된 상태 저장
 
         return new IssueResponseDTO(issueRepository.getById(id));
+    }
+
+    //이슈 통계
+    public IssueStatisticsDTO getIssueStatistics(Long projectId) {
+        IssueStatisticsDTO stats = new IssueStatisticsDTO();
+
+        long totalIssues = issueRepository.count();
+        stats.setTotalIssues(totalIssues);
+
+        List<Object[]> issuesByStatus = issueRepository.countIssuesByStatus(projectId);
+        Map<String, Long> issuesByStatusMap = new HashMap<>();
+        for (Object[] row : issuesByStatus) {
+            issuesByStatusMap.put((String) row[0], (Long) row[1]);
+        }
+        stats.setIssuesByStatus(issuesByStatusMap);
+
+        List<Object[]> issuesByPriority = issueRepository.countIssuesByPriority(projectId);
+        Map<String, Long> issuesByPriorityMap = new HashMap<>();
+        for (Object[] row : issuesByPriority) {
+            issuesByPriorityMap.put((String) row[0], (Long) row[1]);
+        }
+        stats.setIssuesByPriority(issuesByPriorityMap);
+
+        return stats;
+    }
+
+    //이슈 일별 통계
+    public IssueStatisticsDTO getDailyIssueStatistics(Long projectId, Date startDate, Date endDate) {
+        IssueStatisticsDTO stats = new IssueStatisticsDTO();
+
+        List<Object[]> issuesByDate = issueRepository.countIssuesByDate(projectId, startDate, endDate);
+        Map<String, Long> issuesByDateMap = new HashMap<>();
+        for (Object[] row : issuesByDate) {
+            issuesByDateMap.put(row[0].toString(), (Long) row[1]);
+        }
+        stats.setIssuesByDate(issuesByDateMap);
+
+        return stats;
     }
 }
