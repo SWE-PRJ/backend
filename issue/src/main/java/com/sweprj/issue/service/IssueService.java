@@ -4,10 +4,7 @@ import com.sweprj.issue.DTO.IssueRequestDTO;
 import com.sweprj.issue.DTO.IssueResponseDTO;
 import com.sweprj.issue.DTO.IssueStateRequestDTO;
 import com.sweprj.issue.domain.Issue;
-import com.sweprj.issue.domain.IssueAssignee;
 import com.sweprj.issue.domain.User;
-import com.sweprj.issue.domain.enums.IssueState;
-import com.sweprj.issue.repository.IssueAssigneeRepository;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
 import com.sweprj.issue.repository.UserRepository;
@@ -22,13 +19,11 @@ public class IssueService {
 
     private final ProjectRepository projectRepository;
     private final IssueRepository issueRepository;
-    private final IssueAssigneeRepository issueAssigneeRepository;
     private final UserRepository userRepository;
 
-    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, IssueAssigneeRepository issueAssigneeRepository, UserRepository userRepository) {
+    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository) {
         this.projectRepository = projectRepository;
         this.issueRepository = issueRepository;
-        this.issueAssigneeRepository = issueAssigneeRepository;
         this.userRepository = userRepository;
     }
 
@@ -85,10 +80,11 @@ public class IssueService {
     //할당된 이슈 검색
     public List<IssueResponseDTO> findIssueAssignedTo(Long userId) { //user가 developer가 맞는지 확인하는 과정 필요
         List<IssueResponseDTO> issueResponseDTOS = new ArrayList<>();
-        List<IssueAssignee>  issueAssignees = issueAssigneeRepository.getIssueAssigneesByAssignee(userRepository.findUserByUserId(userId));
+        User user = userRepository.getById(userId);
+        List<Issue> issues = issueRepository.getIssuesByAssignee(user);
 
-        for (int i = 0; i < issueAssignees.size(); i++) {
-            issueResponseDTOS.add(new IssueResponseDTO(issueAssignees.get(0).getIssue()));
+        for (int i = 0; i < issues.size(); i++) {
+            issueResponseDTOS.add(new IssueResponseDTO(issues.get(0)));
         }
 
         return issueResponseDTOS;

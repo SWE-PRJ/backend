@@ -32,7 +32,7 @@ public abstract class User implements UserDetails {
     private String password;
 
     @OneToMany(mappedBy = "assignee")
-    private List<IssueAssignee> assignedIssues;
+    private List<Issue> assignedIssues;
 
 //    @OneToMany(mappedBy = "commenter")
 //    private List<Comment> comments;
