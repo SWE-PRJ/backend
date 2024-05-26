@@ -34,14 +34,16 @@ public class JwtTokenProvider {
     public String generateToken(Authentication authentication) {
 
 
-        // Claim: JWT 토큰에 저장되는 정보
-        final Claims claims = Jwts.claims()
-                .setIssuedAt(new Date());
-
         // 사용자의 id를 Claim에 저장
         User userEntity = (User) authentication.getPrincipal();
         Long id = userEntity.getUserId();
+        String role = userEntity.getRole();
+
+        // Claim: JWT 토큰에 저장되는 정보
+        final Claims claims = Jwts.claims()
+                .setIssuedAt(new Date());
         claims.put("id", id);
+        claims.put("role", role);
 
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
@@ -83,4 +85,10 @@ public class JwtTokenProvider {
         Claims claims = getBody(token);
         return Long.valueOf(claims.get("id").toString());
     }
+
+    public String getRoleFromJwt(String token) {
+        Claims claims = getBody(token);
+        return claims.get("role").toString();
+    }
+
 }

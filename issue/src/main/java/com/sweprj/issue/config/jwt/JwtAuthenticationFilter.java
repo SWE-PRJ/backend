@@ -6,6 +6,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -33,9 +37,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // JWT 토큰 유효성 검사
             if (jwtTokenProvider.validateToken(token) == JwtValidationType.VALID_JWT) {
                 Long memberId = jwtTokenProvider.getUserFromJwt(token);
+                String role = jwtTokenProvider.getRoleFromJwt(token);
+
+                Collection<? extends GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
                 // 사용자 인증 객체 생성
-                UserAuthentication authentication = new UserAuthentication(memberId.toString(), null, null);
+                UserAuthentication authentication = new UserAuthentication(memberId.toString(), null, authorities);
 
                 // request 정보로 사용자 객체 디테일 설정
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
