@@ -1,6 +1,5 @@
 package com.sweprj.issue.repository;
 
-import com.sweprj.issue.domain.Developer;
 import com.sweprj.issue.domain.IssueAssignee;
 import com.sweprj.issue.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
