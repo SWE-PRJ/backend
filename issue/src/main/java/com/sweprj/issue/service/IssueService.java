@@ -1,10 +1,9 @@
 package com.sweprj.issue.service;
 
-import com.sweprj.issue.DTO.IssueRequestDTO;
-import com.sweprj.issue.DTO.IssueResponseDTO;
-import com.sweprj.issue.DTO.IssueStateRequestDTO;
+import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
+import com.sweprj.issue.domain.enums.IssueState;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
 import com.sweprj.issue.repository.UserRepository;
@@ -44,15 +43,13 @@ public class IssueService {
     }
 
     //모든 이슈 검색
-    public List<IssueResponseDTO> findAll() {
-        List<IssueResponseDTO> issueResponseDTOS = new ArrayList<>();
+    public IssueListResponse findAll() {
+        IssueListResponse issueListResponse = new IssueListResponse();
         List<Issue> issues = issueRepository.findAll();
 
-        for (int i = 0; i < issues.size(); i++) {
-            issueResponseDTOS.add(new IssueResponseDTO(issues.get(i)));
-        }
+        issueListResponse.addAllIssues(issues);
 
-        return issueResponseDTOS;
+        return issueListResponse;
     }
 
     //이슈 상세정보 확인
@@ -66,28 +63,24 @@ public class IssueService {
 
 
     //프로젝트 전체 이슈 검색
-    public List<IssueResponseDTO> findByProject(Long projectId) {
-        List<IssueResponseDTO> issueResponseDTOS = new ArrayList<>();
+    public IssueListResponse findByProject(Long projectId) {
+        IssueListResponse issueListResponse = new IssueListResponse();
         List<Issue> issues = issueRepository.getIssuesByProject(projectRepository.getById(projectId));
 
-        for (int i = 0; i < issues.size(); i++) {
-            issueResponseDTOS.add(new IssueResponseDTO(issues.get(i)));
-        }
+        issueListResponse.addAllIssues(issues);
 
-        return issueResponseDTOS;
+        return issueListResponse;
     }
 
     //할당된 이슈 검색
-    public List<IssueResponseDTO> findIssueAssignedTo(Long userId) { //user가 developer가 맞는지 확인하는 과정 필요
-        List<IssueResponseDTO> issueResponseDTOS = new ArrayList<>();
+    public IssueListResponse findIssueAssignedTo(Long userId) { //user가 developer가 맞는지 확인하는 과정 필요
+        IssueListResponse issueListResponse = new IssueListResponse();
         User user = userRepository.getById(userId);
         List<Issue> issues = issueRepository.getIssuesByAssignee(user);
 
-        for (int i = 0; i < issues.size(); i++) {
-            issueResponseDTOS.add(new IssueResponseDTO(issues.get(0)));
-        }
+        issueListResponse.addAllIssues(issues);
 
-        return issueResponseDTOS;
+        return issueListResponse;
     }
 
     //이슈 상태 변경
@@ -101,5 +94,19 @@ public class IssueService {
         issueRepository.save(issue); // 변경된 상태 저장
 
         return new IssueResponseDTO(issueRepository.getById(id));
+    }
+
+    public IssueResponseDTO setIssueAssignee(Issue issue, IssueAssigneeRequest issueAssigneeRequest) {
+        User user = userRepository.findUserByUserId(issueAssigneeRequest.getUserId());
+
+        try {
+            issue.setAssignee(user);
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
+        issue.setState(IssueState.ASSIGNED);
+        issueRepository.save(issue);
+
+        return new IssueResponseDTO(issue);
     }
 }

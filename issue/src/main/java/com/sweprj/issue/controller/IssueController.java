@@ -1,8 +1,6 @@
 package com.sweprj.issue.controller;
 
-import com.sweprj.issue.DTO.IssueRequestDTO;
-import com.sweprj.issue.DTO.IssueResponseDTO;
-import com.sweprj.issue.DTO.IssueStateRequestDTO;
+import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.service.IssueService;
@@ -42,14 +40,14 @@ public class IssueController {
     //프로젝트의 전체 이슈 검색
     @GetMapping("/projects/{projectId}/issues")
     @ResponseBody
-    public ResponseEntity<List<IssueResponseDTO>> findIssuesIn(@PathVariable("projectId") Long projectId) {
+    public ResponseEntity<IssueListResponse> findIssuesIn(@PathVariable("projectId") Long projectId) {
         return ResponseEntity.ok(issueService.findByProject(projectId));
     }
 
     //유저에게 할당된 이슈 검색
     @GetMapping("/users/{userId}/issues")
     @ResponseBody
-    public ResponseEntity<List<IssueResponseDTO>> browseAssignedIssues(@PathVariable("userId") Long userId) {
+    public ResponseEntity<IssueListResponse> browseAssignedIssues(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok(issueService.findIssueAssignedTo(userId));
     }
 
@@ -68,7 +66,17 @@ public class IssueController {
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
-        System.out.println(issueStateRequestDTO.getState());
         return ResponseEntity.ok(issueService.setIssueState(id, issueStateRequestDTO));
+    }
+
+    //이슈 할당
+    @PostMapping("/issues/{issueId}")
+    @ResponseBody
+    public ResponseEntity<IssueResponseDTO> assigneIssue(@PathVariable("issueId") Long id, @RequestBody IssueAssigneeRequest issueAssigneeRequest) {
+        Issue issue = issueService.findById(id);
+        if (issue == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(issueService.setIssueAssignee(issue, issueAssigneeRequest));
     }
 }

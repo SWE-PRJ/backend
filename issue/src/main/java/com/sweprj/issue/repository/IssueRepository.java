@@ -12,6 +12,5 @@ import java.util.List;
 public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     List<Issue> getIssuesByProject(Project project);
-
     List<Issue> getIssuesByAssignee(User user);
 }
