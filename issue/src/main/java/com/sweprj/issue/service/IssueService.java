@@ -9,7 +9,6 @@ import com.sweprj.issue.repository.ProjectRepository;
 import com.sweprj.issue.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -27,19 +26,19 @@ public class IssueService {
     }
 
     //이슈 생성
-    public IssueResponseDTO createIssue(Long projectId, User reporter, IssueRequestDTO issueRequestDTO) {
+    public IssueResponse createIssue(Long projectId, User reporter, IssueRequest issueRequest) {
         Issue issue = new Issue();
 
-        issue.setTitle(issueRequestDTO.getTitle());
-        issue.setDescription(issueRequestDTO.getDescription());
+        issue.setTitle(issueRequest.getTitle());
+        issue.setDescription(issueRequest.getDescription());
         issue.setReporter(reporter);
-        issue.setPriority(issueRequestDTO.getPriority());
+        issue.setPriority(issueRequest.getPriority());
         issue.setProject(projectRepository.getById(projectId));
         issue.setReportedAt(new Date());
 
         issueRepository.save(issue);
 
-        return new IssueResponseDTO(issue);
+        return new IssueResponse(issue);
     }
 
     //모든 이슈 검색
@@ -53,8 +52,8 @@ public class IssueService {
     }
 
     //이슈 상세정보 확인
-    public IssueResponseDTO findDTOById(Long id) {
-        return new IssueResponseDTO(issueRepository.getById(id));
+    public IssueResponse findDTOById(Long id) {
+        return new IssueResponse(issueRepository.getById(id));
     }
 
     public Issue findById(Long id) {
@@ -84,19 +83,19 @@ public class IssueService {
     }
 
     //이슈 상태 변경
-    public IssueResponseDTO setIssueState(Long id, IssueStateRequestDTO issueStateRequestDTO) {
+    public IssueResponse setIssueState(Long id, IssueStateRequest issueStateRequest) {
         Issue issue = issueRepository.getById(id);
         try {
-            issue.setState(issueStateRequestDTO.getState());
+            issue.setState(issueStateRequest.getState());
         } catch (IllegalArgumentException e) {
             System.err.println(e.getMessage());
         }
         issueRepository.save(issue); // 변경된 상태 저장
 
-        return new IssueResponseDTO(issueRepository.getById(id));
+        return new IssueResponse(issueRepository.getById(id));
     }
 
-    public IssueResponseDTO setIssueAssignee(Issue issue, IssueAssigneeRequest issueAssigneeRequest) {
+    public IssueResponse setIssueAssignee(Issue issue, IssueAssigneeRequest issueAssigneeRequest) {
         User user = userRepository.findUserByUserId(issueAssigneeRequest.getUserId());
 
         try {
@@ -107,6 +106,6 @@ public class IssueService {
         issue.setState(IssueState.ASSIGNED);
         issueRepository.save(issue);
 
-        return new IssueResponseDTO(issue);
+        return new IssueResponse(issue);
     }
 }

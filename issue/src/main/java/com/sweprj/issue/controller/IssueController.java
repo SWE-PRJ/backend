@@ -9,10 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 @Controller
 @RequestMapping("/api")
 public class IssueController {
@@ -28,13 +24,13 @@ public class IssueController {
     //프로젝트에서 이슈 생성
     @PostMapping("/projects/{projectId}/issues")
     @ResponseBody
-    public ResponseEntity<IssueResponseDTO> createIssue(@PathVariable("projectId") Long projectId, @RequestBody IssueRequestDTO issueRequestDTO) {
-        User reporter = userService.findById(issueRequestDTO.getReporterId());
+    public ResponseEntity<IssueResponse> createIssue(@PathVariable("projectId") Long projectId, @RequestBody IssueRequest issueRequest) {
+        User reporter = userService.findById(issueRequest.getReporterId());
         if (reporter == null) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(issueService.createIssue(projectId, reporter, issueRequestDTO));
+        return ResponseEntity.ok(issueService.createIssue(projectId, reporter, issueRequest));
     }
 
     //프로젝트의 전체 이슈 검색
@@ -54,25 +50,25 @@ public class IssueController {
     //이슈 상세정보 확인
     @GetMapping("/issues/{issueId}")
     @ResponseBody
-    public ResponseEntity<IssueResponseDTO> getIssue(@PathVariable("issueId") Long id) {
+    public ResponseEntity<IssueResponse> getIssue(@PathVariable("issueId") Long id) {
         return ResponseEntity.ok(issueService.findDTOById(id));
     }
 
     //이슈 상태 변경
     @PatchMapping("/projects/{projectId}/issues/{issueId}")
     @ResponseBody
-    public ResponseEntity<IssueResponseDTO> changeIssue(@PathVariable("issueId") Long id, @RequestBody IssueStateRequestDTO issueStateRequestDTO) {
+    public ResponseEntity<IssueResponse> changeIssue(@PathVariable("issueId") Long id, @RequestBody IssueStateRequest issueStateRequest) {
         Issue issue = issueService.findById(id);
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(issueService.setIssueState(id, issueStateRequestDTO));
+        return ResponseEntity.ok(issueService.setIssueState(id, issueStateRequest));
     }
 
     //이슈 할당
     @PostMapping("/issues/{issueId}")
     @ResponseBody
-    public ResponseEntity<IssueResponseDTO> assigneIssue(@PathVariable("issueId") Long id, @RequestBody IssueAssigneeRequest issueAssigneeRequest) {
+    public ResponseEntity<IssueResponse> assigneIssue(@PathVariable("issueId") Long id, @RequestBody IssueAssigneeRequest issueAssigneeRequest) {
         Issue issue = issueService.findById(id);
         if (issue == null) {
             return ResponseEntity.notFound().build();

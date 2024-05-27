@@ -4,6 +4,6 @@ import com.sweprj.issue.domain.enums.IssueState;
 import lombok.Getter;
 
 @Getter
-public class IssueStateRequestDTO {
+public class IssueStateRequest {
     private IssueState state;
 }
