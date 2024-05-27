@@ -1,7 +1,7 @@
 package com.sweprj.issue.controller;
 
-import com.sweprj.issue.dto.UserLogInRequest;
-import com.sweprj.issue.dto.UserSignInRequest;
+import com.sweprj.issue.DTO.UserLogInRequest;
+import com.sweprj.issue.DTO.UserSignInRequest;
 import com.sweprj.issue.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

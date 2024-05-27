@@ -34,8 +34,8 @@ public abstract class User implements UserDetails {
     @OneToMany(mappedBy = "assignee")
     private List<Issue> assignedIssues;
 
-//    @OneToMany(mappedBy = "commenter")
-//    private List<Comment> comments;
+    @OneToMany(mappedBy = "commenter")
+    private List<Comment> comments;
 
     @OneToMany(mappedBy = "user")
     private List<ProjectUser> projects;
