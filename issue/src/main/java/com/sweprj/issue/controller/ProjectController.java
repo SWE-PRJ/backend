@@ -15,13 +15,13 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<Project> createProject(@RequestParam String name) {
         Project project = projectService.createProject(name);
         return ResponseEntity.ok(project);
     }
 
-    @PostMapping("/{projectId}/addUser/{userId}")
+    @PostMapping("/{projectId}/{userId}")
     public ResponseEntity<String> addUserToProject(@PathVariable Long projectId, @PathVariable Long userId) {
         try {
             projectService.addUserToProject(projectId, userId);

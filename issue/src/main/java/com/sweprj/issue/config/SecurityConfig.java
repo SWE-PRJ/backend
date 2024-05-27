@@ -36,13 +36,17 @@ public class SecurityConfig {
                 // 인증되지 않은 사용자의 접근에 대해 401 Unauthorized 에러를 리턴하는 클래스
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
-                .authorizeRequests()
-                .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/signup")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
-                .anyRequest().authenticated()
-                .and()
+//                .authorizeRequests()
+                .authorizeHttpRequests(authorize -> authorize
+//                .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/signup").permitAll()
+                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/").permitAll()
+//                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
+//                .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
