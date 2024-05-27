@@ -15,7 +15,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> getIssuesByProject(Project project);
 
     @Query("SELECT i.state, COUNT(i) FROM Issue i WHERE i.project.id = :projectId GROUP BY i.state")
-    List<Object[]> countIssuesByStatus(Long projectId);
+    List<Object[]> countIssuesByState(Long projectId);
 
     @Query("SELECT i.priority, COUNT(i) FROM Issue i WHERE i.project.id = :projectId GROUP BY i.priority")
     List<Object[]> countIssuesByPriority(Long projectId);

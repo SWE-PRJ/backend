@@ -106,18 +106,18 @@ public class IssueService {
     }
 
     //이슈 통계
-    public IssueStatisticsDTO getIssueStatistics(Long projectId) {
+    public IssueStatisticsDTO getIssueStatistics(Long projectId, Date start, Date end) {
         IssueStatisticsDTO stats = new IssueStatisticsDTO();
 
         long totalIssues = issueRepository.count();
         stats.setTotalIssues(totalIssues);
 
-        List<Object[]> issuesByStatus = issueRepository.countIssuesByStatus(projectId);
-        Map<String, Long> issuesByStatusMap = new HashMap<>();
-        for (Object[] row : issuesByStatus) {
-            issuesByStatusMap.put((String) row[0], (Long) row[1]);
+        List<Object[]> issuesByState = issueRepository.countIssuesByState(projectId);
+        Map<String, Long> issuesByStateMap = new HashMap<>();
+        for (Object[] row : issuesByState) {
+            issuesByStateMap.put((String) row[0], (Long) row[1]);
         }
-        stats.setIssuesByStatus(issuesByStatusMap);
+        stats.setIssuesByStatus(issuesByStateMap);
 
         List<Object[]> issuesByPriority = issueRepository.countIssuesByPriority(projectId);
         Map<String, Long> issuesByPriorityMap = new HashMap<>();
@@ -126,14 +126,7 @@ public class IssueService {
         }
         stats.setIssuesByPriority(issuesByPriorityMap);
 
-        return stats;
-    }
-
-    //이슈 일별 통계
-    public IssueStatisticsDTO getDailyIssueStatistics(Long projectId, Date startDate, Date endDate) {
-        IssueStatisticsDTO stats = new IssueStatisticsDTO();
-
-        List<Object[]> issuesByDate = issueRepository.countIssuesByDate(projectId, startDate, endDate);
+        List<Object[]> issuesByDate = issueRepository.countIssuesByDate(projectId, start, end);
         Map<String, Long> issuesByDateMap = new HashMap<>();
         for (Object[] row : issuesByDate) {
             issuesByDateMap.put(row[0].toString(), (Long) row[1]);
