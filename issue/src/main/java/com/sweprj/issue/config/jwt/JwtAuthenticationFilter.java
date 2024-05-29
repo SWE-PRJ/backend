@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Collection<? extends GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
                 // 사용자 인증 객체 생성
-                UserAuthentication authentication = new UserAuthentication(memberId.toString(), null, authorities);
+                UserAuthentication authentication = new UserAuthentication(memberId.toString(), token, authorities);
 
                 // request 정보로 사용자 객체 디테일 설정
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
