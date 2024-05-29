@@ -5,6 +5,7 @@ import com.sweprj.issue.config.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -43,6 +44,12 @@ public class SecurityConfig {
                         .requestMatchers("/signup").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/projects/*/issues").hasRole("TESTER")
+                        .requestMatchers(HttpMethod.POST, "/api/issues/*/comments").hasAnyRole("TESTER", "DEV")
+                        .requestMatchers(HttpMethod.GET, "/api/projects/*/issues").hasAnyRole("PL")
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/issues").hasAnyRole("DEV")
+                        .requestMatchers(HttpMethod.PATCH, "/api/projects/*/issues/*").hasAnyRole("PL", "DEV", "TESTER")
+                        .requestMatchers(HttpMethod.POST, "/api/issues/*").hasRole("PL")
 //                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
 //                .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
                         .anyRequest().authenticated()
