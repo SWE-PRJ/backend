@@ -30,6 +30,11 @@ public class Issue {
     @JoinColumn(name = "fixer_id")
     private User fixer;
 
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
+
+
     private String priority;
 
     @Enumerated(EnumType.STRING)

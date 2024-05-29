@@ -12,9 +12,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class IssueResponseDTO {
+public class IssueResponse {
 
-    public IssueResponseDTO(Issue issue) {
+    public IssueResponse(Issue issue) {
         if (issue == null) {
             throw new IllegalArgumentException("Issue cannot be null");
         }
