@@ -14,7 +14,6 @@ import java.util.List;
 public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     List<Issue> getIssuesByProject(Project project);
-<<<<<<< HEAD
 
     @Query("SELECT i.state, COUNT(i) FROM Issue i WHERE i.project.id = :projectId GROUP BY i.state")
     List<Object[]> countIssuesByState(Long projectId);
@@ -27,7 +26,5 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     @Query("SELECT MONTH(i.reportedAt), DAY(i.reportedAt), COUNT(i) FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate GROUP BY MONTH(i.reportedAt), DAY(i.reportedAt)")
     List<Object[]> countIssuesByDayPerMonth(Long projectId, Date startDate, Date endDate);
-=======
     List<Issue> getIssuesByAssignee(User user);
->>>>>>> develop
 }
