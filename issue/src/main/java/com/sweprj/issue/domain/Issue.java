@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +48,6 @@ public class Issue {
 
     private Date reportedAt;
 
-    @OneToMany(mappedBy = "issue")
-    private List<Comment> comments;
+    @OneToMany(mappedBy = "issue", cascade = CascadeType.ALL)
+    private List<Comment> comments = new ArrayList<>();
 }
