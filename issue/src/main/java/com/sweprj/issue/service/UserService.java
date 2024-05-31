@@ -116,6 +116,7 @@ public class UserService implements UserDetailsService {
         Map<String, Object> body = new HashMap<>();
         body.put("token", token);
         body.put("id", user.getUserId());
+        body.put("role", user.getRole());
         return body;
     }
 
