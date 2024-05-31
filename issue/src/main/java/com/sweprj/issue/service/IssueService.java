@@ -98,8 +98,9 @@ public class IssueService {
 
 
     //이슈 할당 (PL)
-    public IssueResponse setIssueAssignee(Issue issue, IssueAssigneeRequest issueAssigneeRequest) {
+    public IssueResponse setIssueAssignee(Long id, IssueAssigneeRequest issueAssigneeRequest) {
         User user = userRepository.findUserByUserId(issueAssigneeRequest.getUserId());
+        Issue issue = issueRepository.getById(id);
 
         try {
             issue.setAssignee(user);
