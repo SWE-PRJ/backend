@@ -115,14 +115,14 @@ public class IssueService {
         List<Object[]> issuesByState = issueRepository.countIssuesByState(projectId);
         Map<String, Long> issuesByStateMap = new HashMap<>();
         for (Object[] row : issuesByState) {
-            issuesByStateMap.put((String) row[0], (Long) row[1]);
+            issuesByStateMap.put(row[0].toString(), (Long) row[1]);
         }
         stats.setIssuesByStatus(issuesByStateMap);
 
         List<Object[]> issuesByPriority = issueRepository.countIssuesByPriority(projectId);
         Map<String, Long> issuesByPriorityMap = new HashMap<>();
         for (Object[] row : issuesByPriority) {
-            issuesByPriorityMap.put((String) row[0], (Long) row[1]);
+            issuesByPriorityMap.put(row[0].toString(), (Long) row[1]);
         }
         stats.setIssuesByPriority(issuesByPriorityMap);
 
