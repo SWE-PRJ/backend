@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class IssueRequestDTO {
+public class IssueRequest {
     private String title;
     private String description;
     private Long  reporterId;

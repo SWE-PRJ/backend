@@ -4,14 +4,13 @@ spring:
   #      username: sa
   #      password:
   #      driver-class-name: org.h2.Driver
-
   profiles:
     include: secret
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/issue?createDatabaseIfNotExist=true
-    username: root
-    password: ${database-password}
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring. datasource. password}
 
   jpa:
     hibernate:
@@ -24,8 +23,3 @@ spring:
 
   main:
     allow-bean-definition-overriding: true
-
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace

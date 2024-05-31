@@ -6,8 +6,8 @@ import com.sweprj.issue.domain.account.Admin;
 import com.sweprj.issue.domain.account.Developer;
 import com.sweprj.issue.domain.account.ProjectLeader;
 import com.sweprj.issue.domain.account.Tester;
-import com.sweprj.issue.dto.UserLogInRequest;
-import com.sweprj.issue.dto.UserSignInRequest;
+import com.sweprj.issue.DTO.UserLogInRequest;
+import com.sweprj.issue.DTO.UserSignInRequest;
 import com.sweprj.issue.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -116,6 +116,7 @@ public class UserService implements UserDetailsService {
         Map<String, Object> body = new HashMap<>();
         body.put("token", token);
         body.put("id", user.getUserId());
+        body.put("role", user.getRole());
         return body;
     }
 
