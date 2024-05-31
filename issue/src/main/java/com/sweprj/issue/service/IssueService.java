@@ -126,12 +126,27 @@ public class IssueService {
         }
         stats.setIssuesByPriority(issuesByPriorityMap);
 
-        List<Object[]> issuesByDate = issueRepository.countIssuesByDate(projectId, start, end);
-        Map<String, Long> issuesByDateMap = new HashMap<>();
-        for (Object[] row : issuesByDate) {
-            issuesByDateMap.put(row[0].toString(), (Long) row[1]);
+        // Calculate monthly statistics
+        List<Object[]> issuesByMonth = issueRepository.countIssuesByMonth(projectId, start, end);
+        Map<String, Long> issuesByMonthMap = new HashMap<>();
+        for (Object[] row : issuesByMonth) {
+            issuesByMonthMap.put(row[0].toString(), (Long) row[1]);
         }
-        stats.setIssuesByDate(issuesByDateMap);
+        stats.setIssuesByMonth(issuesByMonthMap);
+
+        // Calculate daily statistics per month
+        List<Object[]> issuesByDayPerMonth = issueRepository.countIssuesByDayPerMonth(projectId, start, end);
+        Map<String, Map<String, Long>> issuesByDayPerMonthMap = new HashMap<>();
+        for (Object[] row : issuesByDayPerMonth) {
+            String month = row[0].toString();
+            String day = row[1].toString();
+            Long count = (Long) row[2];
+            if (!issuesByDayPerMonthMap.containsKey(month)) {
+                issuesByDayPerMonthMap.put(month, new HashMap<>());
+            }
+            issuesByDayPerMonthMap.get(month).put(day, count);
+        }
+        stats.setIssuesByDayPerMonth(issuesByDayPerMonthMap);
 
         return stats;
     }

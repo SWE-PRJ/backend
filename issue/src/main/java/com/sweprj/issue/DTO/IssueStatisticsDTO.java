@@ -11,4 +11,7 @@ public class IssueStatisticsDTO {
     private Map<String, Long> issuesByStatus;
     private Map<String, Long> issuesByPriority;
     private Map<String, Long> issuesByDate;
+    private Map<String, Long> issuesByMonth;
+    private Map<String, Map<String, Long>> issuesByDayPerMonth;
+
 }

@@ -78,40 +78,19 @@ public class IssueController {
     @GetMapping("/projects/{projectId}/issues/statistics")
     public ResponseEntity<IssueStatisticsDTO> getIssueStatistics(
             @PathVariable Long projectId,
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        Date start = null;
-        Date end = null;
         Calendar cal = Calendar.getInstance();
 
         try {
-            if (startDate != null) {
-                start = formatter.parse(startDate);
-            }
-            if (endDate != null) {
-                end = formatter.parse(endDate);
-            }
-
-            if (start == null && end == null) {
-                end = new Date();
-                cal.setTime(end);
-                cal.add(Calendar.DAY_OF_YEAR, -7);
-                start = cal.getTime();
-            } else if (start == null) {
-                cal.setTime(end);
-                cal.add(Calendar.DAY_OF_YEAR, -7);
-                start = cal.getTime();
-            } else if (end == null) {
-                cal.setTime(start);
-                cal.add(Calendar.DAY_OF_YEAR, 7);
-                end = cal.getTime();
-            }
+            Date start = formatter.parse(startDate);
+            Date end = formatter.parse(endDate);
+            IssueStatisticsDTO stats = issueService.getIssueStatistics(projectId, start, end);
+            return ResponseEntity.ok(stats);
         } catch (ParseException e) {
             return ResponseEntity.badRequest().build();
         }
 
-        IssueStatisticsDTO stats = issueService.getIssueStatistics(projectId, start, end);
-        return ResponseEntity.ok(stats);
     }
 }

@@ -20,6 +20,9 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Query("SELECT i.priority, COUNT(i) FROM Issue i WHERE i.project.id = :projectId GROUP BY i.priority")
     List<Object[]> countIssuesByPriority(Long projectId);
 
-    @Query("SELECT DATE(i.reportedAt), COUNT(i) FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate GROUP BY DATE(i.reportedAt)")
-    List<Object[]> countIssuesByDate(Long projectId, Date startDate, Date endDate);
+    @Query("SELECT MONTH(i.reportedAt), COUNT(i) FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate GROUP BY MONTH(i.reportedAt)")
+    List<Object[]> countIssuesByMonth(Long projectId, Date startDate, Date endDate);
+
+    @Query("SELECT MONTH(i.reportedAt), DAY(i.reportedAt), COUNT(i) FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate GROUP BY MONTH(i.reportedAt), DAY(i.reportedAt)")
+    List<Object[]> countIssuesByDayPerMonth(Long projectId, Date startDate, Date endDate);
 }
