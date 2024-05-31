@@ -73,6 +73,6 @@ public class IssueController {
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(issueService.setIssueAssignee(issue, issueAssigneeRequest));
+        return ResponseEntity.ok(issueService.setIssueAssignee(id, issueAssigneeRequest));
     }
 }
