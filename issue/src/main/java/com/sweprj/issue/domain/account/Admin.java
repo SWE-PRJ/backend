@@ -7,8 +7,8 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("admin")
 public class Admin extends User {
-    public Admin(String name, String identifier, String password) {
-        super(name, identifier, password);
+    public Admin(String identifier, String password) {
+        super(identifier, password);
     }
 
     public Admin() {
