@@ -4,7 +4,10 @@ import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
+import com.sweprj.issue.domain.enums.IssuePriority;
 import com.sweprj.issue.domain.enums.IssueState;
+import com.sweprj.issue.exception.InvalidIssuePriorityException;
+import com.sweprj.issue.exception.InvalidIssueStateException;
 import com.sweprj.issue.exception.ResourceNotFoundException;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
@@ -38,10 +41,14 @@ public class IssueService {
 
         Issue issue = new Issue();
 
+        if (!IssuePriority.isValid(issueRequest.getPriority())) {
+            throw new InvalidIssuePriorityException(issueRequest.getPriority() + "는 잘못된 이슈 우선순위입니다.");
+        }
+
         issue.setTitle(issueRequest.getTitle());
         issue.setDescription(issueRequest.getDescription());
         issue.setReporter(reporter.get());
-        issue.setPriority(issueRequest.getPriority());
+        issue.setPriority(IssuePriority.fromString(issueRequest.getPriority()));
         issue.setProject(projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found")));
         issue.setReportedAt(new Date());
 
@@ -94,11 +101,11 @@ public class IssueService {
     //이슈 상태 변경 (PL, DEV, TESTER)
     public IssueResponse setIssueState(Long id, IssueStateRequest issueStateRequest) {
         Issue issue = issueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
-        try {
-            issue.setState(issueStateRequest.getState());
-        } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
+
+        if (!IssueState.isValid(issueStateRequest.getState())) {
+            throw new InvalidIssueStateException(issueStateRequest.getState() + "는 잘못된 이슈 상태입니다.");
         }
+        issue.setState(IssueState.fromString(issueStateRequest.getState()));
         issueRepository.save(issue); // 변경된 상태 저장
 
         return new IssueResponse(issueRepository.getById(id));

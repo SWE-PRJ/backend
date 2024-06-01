@@ -4,6 +4,8 @@ import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
+import com.sweprj.issue.domain.enums.IssuePriority;
+import com.sweprj.issue.exception.InvalidIssuePriorityException;
 import com.sweprj.issue.service.IssueService;
 import com.sweprj.issue.service.UserService;
 import org.springframework.http.ResponseEntity;

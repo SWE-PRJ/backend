@@ -1,5 +1,6 @@
 package com.sweprj.issue.exception;
 
+import org.springframework.beans.NotReadablePropertyException;
 import com.sweprj.issue.DTO.ErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,19 @@ public class GlobalExceptionHandler extends RuntimeException{
         response.put("error", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(InvalidIssuePriorityException.class)
+    public ResponseEntity<Map<String,Object>> handleInvalidIssuePriorityException(InvalidIssuePriorityException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidIssueStateException.class)
+    public ResponseEntity<Map<String,Object>> handleInvalidIssueStateException(InvalidIssueStateException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidTokenException(InvalidTokenException ex) {
