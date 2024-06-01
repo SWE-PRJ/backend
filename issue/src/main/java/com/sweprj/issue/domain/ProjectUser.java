@@ -3,10 +3,12 @@ package com.sweprj.issue.domain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectUser {

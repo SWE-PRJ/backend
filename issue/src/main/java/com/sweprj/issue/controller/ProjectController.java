@@ -1,6 +1,7 @@
 package com.sweprj.issue.controller;
 
 import com.sweprj.issue.DTO.ProjectDTO;
+import com.sweprj.issue.DTO.ProjectUsersResponse;
 import com.sweprj.issue.service.ProjectService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,5 +50,12 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok("User added to project successfully");
+    }
+
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ProjectUsersResponse> getUsersInProject(@PathVariable Long projectId) {
+        ProjectUsersResponse projectUsersResponse;
+        projectUsersResponse= projectService.getUsersInProject(projectId);
+        return ResponseEntity.ok(projectUsersResponse);
     }
 }
