@@ -2,6 +2,7 @@ package com.sweprj.issue.DTO;
 
 import com.sweprj.issue.domain.Comment;
 import com.sweprj.issue.domain.Issue;
+import com.sweprj.issue.domain.enums.IssuePriority;
 import com.sweprj.issue.domain.enums.IssueState;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,7 +50,7 @@ public class IssueResponse {
     private String reporterName;
     private String fixerName;
     private String assigneeName;
-    private String priority;
+    private IssuePriority priority;
     private IssueState state;
     private Long projectId;
     private Date reportedAt;
