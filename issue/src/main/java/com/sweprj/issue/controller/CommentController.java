@@ -5,6 +5,7 @@ import com.sweprj.issue.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,6 +24,11 @@ public class CommentController {
         String content = requestBody.get("content").toString();
 
         CommentDTO comment = commentService.createComment(issueId, userId, content);
+        return ResponseEntity.ok(comment);
+    }
+    @GetMapping
+    public ResponseEntity<List<CommentDTO>> getComments(@PathVariable Long issueId) {
+        List<CommentDTO> comment = commentService.getAllComments(issueId);
         return ResponseEntity.ok(comment);
     }
 
