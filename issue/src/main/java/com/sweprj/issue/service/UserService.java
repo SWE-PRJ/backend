@@ -47,21 +47,21 @@ public class UserService implements UserDetailsService {
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        User user = createUserByRole(dto.getName(), dto.getIdentifier(), encodedPassword, role);
+        User user = createUserByRole(dto.getIdentifier(), encodedPassword, role);
 
         return userRepository.save(user).getUserId();
     }
 
-    private User createUserByRole(String name, String identifier, String password, String role) {
+    private User createUserByRole(String identifier, String password, String role) {
         switch (role.toLowerCase()) {
             case "admin":
-                return new Admin(name, identifier, password);
+                return new Admin(identifier, password);
             case "pl":
-                return new ProjectLeader(name, identifier, password);
+                return new ProjectLeader(identifier, password);
             case "dev":
-                return new Developer(name, identifier, password);
+                return new Developer(identifier, password);
             case "tester":
-                return new Tester(name, identifier, password);
+                return new Tester(identifier, password);
             default:
                 throw new IllegalArgumentException("Invalid role: " + role);
         }
@@ -72,7 +72,7 @@ public class UserService implements UserDetailsService {
         // 1. dto -> entity 변환
         // 2. repository의 save 메서드 호출
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        User user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);;
+        User user = new Admin(dto.getIdentifier(), encodedPassword);;
 
 
 //        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
@@ -123,9 +123,6 @@ public class UserService implements UserDetailsService {
     /**
      * ID로 회원 조회
      */
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElse(null);
-    }
   
     public User findById(Long id) {
         return userRepository.findUserByUserId(id);

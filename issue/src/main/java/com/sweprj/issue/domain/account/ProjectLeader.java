@@ -7,8 +7,8 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("pl")
 public class ProjectLeader extends User {
-    public ProjectLeader(String name, String identifier, String password) {
-        super(name, identifier, password);
+    public ProjectLeader(String identifier, String password) {
+        super(identifier, password);
     }
 
     public ProjectLeader() {
