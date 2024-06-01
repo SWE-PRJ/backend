@@ -1,7 +1,7 @@
 package com.sweprj.issue.service;
 
 import com.sweprj.issue.DTO.*;
-import com.sweprj.issue.DTO.IssueStatisticsDTO;
+import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.enums.IssuePriority;
@@ -12,10 +12,10 @@ import com.sweprj.issue.exception.ResourceNotFoundException;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
 import com.sweprj.issue.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
 import java.util.*;
 
 @Service
@@ -24,20 +24,20 @@ public class IssueService {
     private final ProjectRepository projectRepository;
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository) {
+    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
         this.projectRepository = projectRepository;
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     //이슈 생성 (TESTER)
     public IssueResponse createIssue(Long projectId, IssueRequest issueRequest) {
-        Optional<User> reporter = userRepository.findByIdentifier(issueRequest.getReporterIdentifier());
-
-        if (reporter == null) {
-            throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
-        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String token = (String) authentication.getCredentials();
+        Long userId = jwtTokenProvider.getUserFromJwt(token);
 
         Issue issue = new Issue();
 
@@ -47,9 +47,11 @@ public class IssueService {
 
         issue.setTitle(issueRequest.getTitle());
         issue.setDescription(issueRequest.getDescription());
-        issue.setReporter(reporter.get());
+        issue.setReporter(userRepository.findById(userId).orElseThrow(()
+                -> new ResourceNotFoundException("User not found")));
         issue.setPriority(IssuePriority.fromString(issueRequest.getPriority()));
-        issue.setProject(projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found")));
+        issue.setProject(projectRepository.findById(projectId).orElseThrow(()
+                -> new ResourceNotFoundException("Project not found")));
         issue.setReportedAt(new Date());
 
         issueRepository.save(issue);

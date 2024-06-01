@@ -3,7 +3,6 @@ package com.sweprj.issue.controller;
 import com.sweprj.issue.DTO.UserLogInRequest;
 import com.sweprj.issue.DTO.UserResponse;
 import com.sweprj.issue.DTO.UserSignInRequest;
-import com.sweprj.issue.domain.User;
 import com.sweprj.issue.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +21,8 @@ public class UserController {
 
     //회원가입
     @PostMapping("/admin/register")
-    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody UserSignInRequest request, @RequestParam String role, @RequestParam String adminIdentifier) {
-        Long id = userService.register(request, role, adminIdentifier);
+    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody UserSignInRequest request, @RequestParam String role) {
+        Long id = userService.register(request, role);
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
         return ResponseEntity.created(null).body(response);

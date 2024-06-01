@@ -5,6 +5,7 @@ import com.sweprj.issue.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,11 +19,13 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<CommentDTO> createComment(@PathVariable Long issueId, @RequestBody Map<String, Object> requestBody) {
-        Long userId = Long.valueOf(requestBody.get("userId").toString());
-        String content = requestBody.get("content").toString();
-
-        CommentDTO comment = commentService.createComment(issueId, userId, content);
+    public ResponseEntity<CommentDTO> createComment(@PathVariable Long issueId, @RequestParam String content) {
+        CommentDTO comment = commentService.createComment(issueId, content);
+        return ResponseEntity.ok(comment);
+    }
+    @GetMapping
+    public ResponseEntity<List<CommentDTO>> getComments(@PathVariable Long issueId) {
+        List<CommentDTO> comment = commentService.getAllComments(issueId);
         return ResponseEntity.ok(comment);
     }
 
