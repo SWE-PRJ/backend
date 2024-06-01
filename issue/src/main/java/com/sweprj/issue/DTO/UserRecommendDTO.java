@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserRecommendDTO {
     private Long userId;
-    private String username;
+    private String userIdentifier;
 }

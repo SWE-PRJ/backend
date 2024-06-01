@@ -85,7 +85,7 @@ public class IssueController {
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
-        User user = userRepository.findByIdentifier(issueAssigneeRequest.getIdentifier()).get();
+        User user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier()).get();
         embeddingService.createIssueEmbedding(issue, user);
         return ResponseEntity.ok(issueService.setIssueAssignee(id, issueAssigneeRequest));
     }
@@ -109,7 +109,7 @@ public class IssueController {
 
     }
 
-    @PostMapping("/issues/{issueId}/recommend")
+    @GetMapping("/issues/{issueId}/recommend")
     public ResponseEntity<UserRecommendDTO> recommendDeveloper(@PathVariable Long issueId) {
         Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new RuntimeException("Issue not found."));
         User recommendedUser = recommendationService.recommendDeveloperForIssue(issue);
