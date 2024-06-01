@@ -6,7 +6,6 @@ import com.sweprj.issue.DTO.UserSignInRequest;
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.domain.Comment;
 import com.sweprj.issue.domain.Issue;
-import com.sweprj.issue.domain.ProjectUser;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.account.Admin;
 import com.sweprj.issue.domain.account.Developer;
@@ -168,7 +167,7 @@ public class UserService implements UserDetailsService {
             userResponse.setRole(user.getRole());
             userResponse.setIssues(user.getAssignedIssues().stream().map(Issue::getId).collect(Collectors.toList()));
             userResponse.setComments(user.getComments().stream().map(Comment::getId).collect(Collectors.toList()));
-            userResponse.setProjects(user.getProjects().stream().map(ProjectUser::getId).collect(Collectors.toList()));
+            userResponse.setProjects(user.getProjects().stream().map(projectUser -> projectUser.getProject().getId()).collect(Collectors.toList()));
             return userResponse;
         } catch (Exception e) {
             throw new ResourceNotFoundException("User not found");
