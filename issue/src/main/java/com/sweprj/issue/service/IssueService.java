@@ -29,7 +29,9 @@ public class IssueService {
     }
 
     //이슈 생성 (TESTER)
-    public IssueResponse createIssue(Long projectId, User reporter, IssueRequest issueRequest) {
+    public IssueResponse createIssue(Long projectId, IssueRequest issueRequest) {
+        User reporter = userRepository.findUserByUserId(issueRequest.getReporterId());
+
         Issue issue = new Issue();
 
         issue.setTitle(issueRequest.getTitle());
