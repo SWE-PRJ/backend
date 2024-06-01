@@ -41,10 +41,10 @@ public class ProjectController {
         return ResponseEntity.ok("Project deleted successfully");
     }
 
-    @PostMapping("/{projectId}/{userId}")
-    public ResponseEntity<String> addUserToProject(@PathVariable Long projectId, @PathVariable Long userId) {
+    @PostMapping("/{projectId}/{identifier}")
+    public ResponseEntity<String> addUserToProject(@PathVariable Long projectId, @PathVariable String identifier) {
         try {
-            projectService.addUserToProject(projectId, userId);
+            projectService.addUserToProject(projectId, identifier);
         } catch(RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

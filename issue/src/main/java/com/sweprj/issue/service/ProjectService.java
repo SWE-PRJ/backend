@@ -44,19 +44,18 @@ public class ProjectService {
         Project updatedProject = projectRepository.save(project);
         return convertToDTO(updatedProject);
     }
-
     public void deleteProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found with id " + projectId));
         projectRepository.delete(project);
     }
     
-    public void addUserToProject(Long projectId, Long userId) {
+    public void addUserToProject(Long projectId, String identifier) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found with id " + projectId));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id " + userId));
+        User user = userRepository.findByIdentifier(identifier)
+                .orElseThrow(() -> new RuntimeException("User not found with identifier " + identifier));
 
         ProjectUser projectUser = new ProjectUser();
         projectUser.setProject(project);

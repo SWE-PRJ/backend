@@ -1,8 +1,6 @@
 package com.sweprj.issue.controller;
 
-import com.sweprj.issue.DTO.IssueRequestDTO;
-import com.sweprj.issue.DTO.IssueResponseDTO;
-import com.sweprj.issue.DTO.IssueStateRequestDTO;
+import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.service.IssueService;
@@ -10,10 +8,6 @@ import com.sweprj.issue.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Controller
 @RequestMapping("/api")
@@ -27,48 +21,58 @@ public class IssueController {
         this.userService = userService;
     }
 
-    //프로젝트에서 이슈 생성
+    //프로젝트에서 이슈 생성 (TESTER)
     @PostMapping("/projects/{projectId}/issues")
     @ResponseBody
-    public ResponseEntity<IssueResponseDTO> createIssue(@PathVariable("projectId") Long projectId, @RequestBody IssueRequestDTO issueRequestDTO) {
-        User reporter = userService.findById(issueRequestDTO.getReporterId());
+    public ResponseEntity<IssueResponse> createIssue(@PathVariable("projectId") Long projectId, @RequestBody IssueRequest issueRequest) {
+        User reporter = userService.findById(issueRequest.getReporterId());
         if (reporter == null) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(issueService.createIssue(projectId, reporter, issueRequestDTO));
+        return ResponseEntity.ok(issueService.createIssue(projectId, reporter, issueRequest));
     }
 
-    //프로젝트의 전체 이슈 검색
+    //프로젝트의 전체 이슈 검색 (PL)
     @GetMapping("/projects/{projectId}/issues")
     @ResponseBody
-    public ResponseEntity<List<IssueResponseDTO>> findIssuesIn(@PathVariable("projectId") Long projectId) {
+    public ResponseEntity<IssueListResponse> findIssuesIn(@PathVariable("projectId") Long projectId) {
         return ResponseEntity.ok(issueService.findByProject(projectId));
     }
 
-    //유저에게 할당된 이슈 검색
+    //유저에게 할당된 이슈 검색 (DEV)
     @GetMapping("/users/{userId}/issues")
     @ResponseBody
-    public ResponseEntity<List<IssueResponseDTO>> browseAssignedIssues(@PathVariable("userId") Long userId) {
+    public ResponseEntity<IssueListResponse> browseAssignedIssues(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok(issueService.findIssueAssignedTo(userId));
     }
 
-    //이슈 상세정보 확인
+    //이슈 상세정보 확인 (PL, DEV, TESTER)
     @GetMapping("/issues/{issueId}")
     @ResponseBody
-    public ResponseEntity<IssueResponseDTO> getIssue(@PathVariable("issueId") Long id) {
+    public ResponseEntity<IssueResponse> getIssue(@PathVariable("issueId") Long id) {
         return ResponseEntity.ok(issueService.findDTOById(id));
     }
 
-    //이슈 상태 변경
+    //이슈 상태 변경 (PL, DEV, TESTER)
     @PatchMapping("/projects/{projectId}/issues/{issueId}")
     @ResponseBody
-    public ResponseEntity<IssueResponseDTO> changeIssue(@PathVariable("issueId") Long id, @RequestBody IssueStateRequestDTO issueStateRequestDTO) {
+    public ResponseEntity<IssueResponse> changeIssue(@PathVariable("issueId") Long id, @RequestBody IssueStateRequest issueStateRequest) {
         Issue issue = issueService.findById(id);
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
-        System.out.println(issueStateRequestDTO.getState());
-        return ResponseEntity.ok(issueService.setIssueState(id, issueStateRequestDTO));
+        return ResponseEntity.ok(issueService.setIssueState(id, issueStateRequest));
+    }
+
+    //이슈 할당 (PL)
+    @PostMapping("/issues/{issueId}")
+    @ResponseBody
+    public ResponseEntity<IssueResponse> assigneIssue(@PathVariable("issueId") Long id, @RequestBody IssueAssigneeRequest issueAssigneeRequest) {
+        Issue issue = issueService.findById(id);
+        if (issue == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(issueService.setIssueAssignee(id, issueAssigneeRequest));
     }
 }
