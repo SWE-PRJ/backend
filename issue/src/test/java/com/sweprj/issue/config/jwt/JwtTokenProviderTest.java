@@ -25,7 +25,7 @@ public class JwtTokenProviderTest {
     @Test
     public void testGenerateToken() {
         // Given
-        User admin = new Admin("admin", "admin_identifier", "password");
+        User admin = new Admin("admin_identifier", "password");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(admin, null, admin.getAuthorities());
 
@@ -39,7 +39,7 @@ public class JwtTokenProviderTest {
     @Test
     public void testValidateToken() {
         // Given
-        User admin = new Admin("admin", "admin_identifier", "password");
+        User admin = new Admin("admin_identifier", "password");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(admin, null, admin.getAuthorities());
         String token = jwtTokenProvider.generateToken(authentication);
@@ -70,7 +70,7 @@ public class JwtTokenProviderTest {
     @Test
     public void testGetRoleFromJwt() {
         // Given
-        User admin = new Admin("admin", "admin_identifier", "password");
+        User admin = new Admin("admin_identifier", "password");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(admin, null, admin.getAuthorities());
         String token = jwtTokenProvider.generateToken(authentication);

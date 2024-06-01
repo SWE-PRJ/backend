@@ -37,26 +37,23 @@ public class UserServiceTest {
     @Test
     public void testRegister() {
         UserSignInRequest request = new UserSignInRequest();
-        request.setName("test");
         request.setIdentifier("test_identifier");
         request.setPassword("password");
 
-        User admin = new Admin("admin", "admin_identifier", passwordEncoder.encode("admin_password"));
+        User admin = new Admin("admin_identifier", passwordEncoder.encode("admin_password"));
         userRepository.save(admin);
 
-        Long userId = userService.register(request, "admin", "admin_identifier");
+        Long userId = userService.register(request,  "admin_identifier");
 
         assertNotNull(userId);
         User savedUser = userRepository.findById(userId).orElse(null);
         assertNotNull(savedUser);
-        assertEquals("test", savedUser.getName());
         assertEquals("ROLE_ADMIN", savedUser.getRole());
     }
 
     @Test
     public void testLogin() {
         UserSignInRequest signUpRequest = new UserSignInRequest();
-        signUpRequest.setName("user");
         signUpRequest.setIdentifier("user_identifier");
         signUpRequest.setPassword("password");
 
@@ -75,7 +72,7 @@ public class UserServiceTest {
 
     @Test
     public void testLoadUserByUsername() {
-        User user = new Admin("user", "user_identifier", passwordEncoder.encode("password"));
+        User user = new Admin("user_identifier", passwordEncoder.encode("password"));
         userRepository.save(user);
 
         UserDetails userDetails = userService.loadUserByUsername("user_identifier");
