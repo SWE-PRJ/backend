@@ -31,11 +31,11 @@ public class ProjectUsersResponse {
     @Setter
     private class UserResponse {
         private String role;
-        private String name;
+        private String identifier;
 
         UserResponse(User user) {
             this.role = user.getRole();
-            this.name = user.getName();
+            this.identifier = user.getIdentifier();
         }
     }
 }

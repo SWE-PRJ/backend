@@ -9,6 +9,6 @@ import lombok.Setter;
 public class IssueRequest {
     private String title;
     private String description;
-    private Long  reporterId;
+    private String reporterIdentifier;
     private IssuePriority priority;
 }

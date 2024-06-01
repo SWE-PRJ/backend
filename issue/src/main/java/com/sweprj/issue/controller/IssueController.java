@@ -32,7 +32,7 @@ public class IssueController {
     @PostMapping("/projects/{projectId}/issues")
     @ResponseBody
     public ResponseEntity<IssueResponse> createIssue(@PathVariable("projectId") Long projectId, @RequestBody IssueRequest issueRequest) {
-        User reporter = userService.findById(issueRequest.getReporterId());
+        User reporter = (User) userService.loadUserByUsername(issueRequest.getReporterIdentifier());
         if (reporter == null) {
             return ResponseEntity.notFound().build();
         }

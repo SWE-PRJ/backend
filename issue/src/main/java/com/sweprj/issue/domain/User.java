@@ -21,9 +21,6 @@ public abstract class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(nullable = false)
-    private String name;
-
     @Column(unique = true)
     private String identifier;
 
@@ -41,8 +38,7 @@ public abstract class User implements UserDetails {
     private List<ProjectUser> projects;
 
 
-    public User(String name, String identifier, String password) {
-        this.name = name;
+    public User(String identifier, String password) {
         this.identifier = identifier;
         this.password = password;
     }
