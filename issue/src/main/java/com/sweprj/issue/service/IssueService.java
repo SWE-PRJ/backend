@@ -33,7 +33,11 @@ public class IssueService {
 
     //이슈 생성 (TESTER)
     public IssueResponse createIssue(Long projectId, IssueRequest issueRequest) {
-        User reporter = userRepository.findUserByUserId(issueRequest.getReporterId());
+        Optional<User> reporter = userRepository.findByIdentifier(issueRequest.getReporterIdentifier());
+
+        if (reporter == null) {
+            throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
+        }
 
         Issue issue = new Issue();
 
@@ -43,7 +47,7 @@ public class IssueService {
 
         issue.setTitle(issueRequest.getTitle());
         issue.setDescription(issueRequest.getDescription());
-        issue.setReporter(reporter);
+        issue.setReporter(reporter.get());
         issue.setPriority(IssuePriority.fromString(issueRequest.getPriority()));
         issue.setProject(projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found")));
         issue.setReportedAt(new Date());
@@ -110,14 +114,14 @@ public class IssueService {
 
     //이슈 할당 (PL)
     public IssueResponse setIssueAssignee(Long id, IssueAssigneeRequest issueAssigneeRequest) {
-        User user = userRepository.findUserByUserId(issueAssigneeRequest.getUserId());
+        Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getIdentifier());
         Issue issue = issueRepository.getById(id);
 
-        try {
-            issue.setAssignee(user);
-        } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
+        if (user == null) {
+            throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
         }
+
+        issue.setAssignee(user.get());
         issue.setState(IssueState.ASSIGNED);
         issueRepository.save(issue);
 

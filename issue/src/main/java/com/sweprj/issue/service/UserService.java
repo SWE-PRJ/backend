@@ -1,11 +1,15 @@
 package com.sweprj.issue.service;
 
+import com.sweprj.issue.DTO.UserResponse;
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.account.Admin;
 import com.sweprj.issue.domain.account.Developer;
 import com.sweprj.issue.domain.account.ProjectLeader;
 import com.sweprj.issue.domain.account.Tester;
+import com.sweprj.issue.domain.Issue;
+import com.sweprj.issue.domain.Comment;
+import com.sweprj.issue.domain.ProjectUser;
 import com.sweprj.issue.DTO.UserLogInRequest;
 import com.sweprj.issue.DTO.UserSignInRequest;
 import com.sweprj.issue.repository.UserRepository;
@@ -24,8 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,21 +53,21 @@ public class UserService implements UserDetailsService {
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        User user = createUserByRole(dto.getName(), dto.getIdentifier(), encodedPassword, role);
+        User user = createUserByRole(dto.getIdentifier(), encodedPassword, role);
 
         return userRepository.save(user).getUserId();
     }
 
-    private User createUserByRole(String name, String identifier, String password, String role) {
+    private User createUserByRole(String identifier, String password, String role) {
         switch (role.toLowerCase()) {
             case "admin":
-                return new Admin(name, identifier, password);
+                return new Admin(identifier, password);
             case "pl":
-                return new ProjectLeader(name, identifier, password);
+                return new ProjectLeader(identifier, password);
             case "dev":
-                return new Developer(name, identifier, password);
+                return new Developer(identifier, password);
             case "tester":
-                return new Tester(name, identifier, password);
+                return new Tester(identifier, password);
             default:
                 throw new IllegalArgumentException("Invalid role: " + role);
         }
@@ -72,7 +78,7 @@ public class UserService implements UserDetailsService {
         // 1. dto -> entity 변환
         // 2. repository의 save 메서드 호출
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        User user = new Admin(dto.getName(), dto.getIdentifier(), encodedPassword);;
+        User user = new Admin(dto.getIdentifier(), encodedPassword);;
 
 
 //        User userEntity = dto.toEntity(passwordEncoder.encode(dto.getPassword()));
@@ -123,13 +129,12 @@ public class UserService implements UserDetailsService {
     /**
      * ID로 회원 조회
      */
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElse(null);
-    }
   
     public User findById(Long id) {
         return userRepository.findUserByUserId(id);
     }
+
+
 
 
     /**
@@ -143,5 +148,25 @@ public class UserService implements UserDetailsService {
 
         System.out.println("loadUserByUsername 유저 찾음: " + user);
         return user;
+    }
+
+
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> getUserResponse(user.getUserId()))
+                .collect(Collectors.toList());
+    }
+    // UserService.java
+
+    public UserResponse getUserResponse(Long id) {
+        User user = userRepository.findUserByUserId(id);
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getUserId());
+        userResponse.setIdentifier(user.getIdentifier());
+        userResponse.setRole(user.getRole());
+        userResponse.setIssues(user.getAssignedIssues().stream().map(Issue::getId).collect(Collectors.toList()));
+        userResponse.setComments(user.getComments().stream().map(Comment::getId).collect(Collectors.toList()));
+        userResponse.setProjects(user.getProjects().stream().map(ProjectUser::getId).collect(Collectors.toList()));
+        return userResponse;
     }
 }

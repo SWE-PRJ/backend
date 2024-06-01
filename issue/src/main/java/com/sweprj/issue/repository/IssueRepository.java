@@ -21,10 +21,17 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
     @Query("SELECT i.priority, COUNT(i) FROM Issue i WHERE i.project.id = :projectId GROUP BY i.priority")
     List<Object[]> countIssuesByPriority(Long projectId);
 
-    @Query("SELECT MONTH(i.reportedAt), COUNT(i) FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate GROUP BY MONTH(i.reportedAt)")
+    @Query("SELECT DATE_FORMAT(i.reportedAt, '%Y-%m'), COUNT(i) " +
+            "FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY DATE_FORMAT(i.reportedAt, '%Y-%m')")
     List<Object[]> countIssuesByMonth(Long projectId, Date startDate, Date endDate);
 
-    @Query("SELECT MONTH(i.reportedAt), DAY(i.reportedAt), COUNT(i) FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate GROUP BY MONTH(i.reportedAt), DAY(i.reportedAt)")
+    @Query("SELECT DATE_FORMAT(i.reportedAt, '%Y-%m'), DAY(i.reportedAt), COUNT(i) " +
+            "FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY DATE_FORMAT(i.reportedAt, '%Y-%m'), DAY(i.reportedAt)")
     List<Object[]> countIssuesByDayPerMonth(Long projectId, Date startDate, Date endDate);
+
+
+
     List<Issue> getIssuesByAssignee(User user);
 }
