@@ -5,5 +5,5 @@ import lombok.Getter;
 
 @Getter
 public class IssueStateRequest {
-    private IssueState state;
+    private String state;
 }

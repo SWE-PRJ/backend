@@ -10,5 +10,5 @@ public class IssueRequest {
     private String title;
     private String description;
     private Long  reporterId;
-    private IssuePriority priority;
+    private String priority;
 }
