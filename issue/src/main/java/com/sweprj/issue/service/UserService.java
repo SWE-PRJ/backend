@@ -1,11 +1,15 @@
 package com.sweprj.issue.service;
 
+import com.sweprj.issue.DTO.UserResponse;
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.account.Admin;
 import com.sweprj.issue.domain.account.Developer;
 import com.sweprj.issue.domain.account.ProjectLeader;
 import com.sweprj.issue.domain.account.Tester;
+import com.sweprj.issue.domain.Issue;
+import com.sweprj.issue.domain.Comment;
+import com.sweprj.issue.domain.ProjectUser;
 import com.sweprj.issue.DTO.UserLogInRequest;
 import com.sweprj.issue.DTO.UserSignInRequest;
 import com.sweprj.issue.repository.UserRepository;
@@ -24,8 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -143,5 +149,25 @@ public class UserService implements UserDetailsService {
 
         System.out.println("loadUserByUsername 유저 찾음: " + user);
         return user;
+    }
+
+
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> getUserResponse(user.getUserId()))
+                .collect(Collectors.toList());
+    }
+    // UserService.java
+
+    public UserResponse getUserResponse(Long id) {
+        User user = userRepository.findUserByUserId(id);
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getUserId());
+        userResponse.setIdentifier(user.getIdentifier());
+        userResponse.setRole(user.getRole());
+        userResponse.setIssues(user.getAssignedIssues().stream().map(Issue::getId).collect(Collectors.toList()));
+        userResponse.setComments(user.getComments().stream().map(Comment::getId).collect(Collectors.toList()));
+        userResponse.setProjects(user.getProjects().stream().map(ProjectUser::getId).collect(Collectors.toList()));
+        return userResponse;
     }
 }
