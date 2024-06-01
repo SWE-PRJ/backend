@@ -21,8 +21,6 @@ public class JwtTokenProviderTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @MockBean
-    private UserRepository userRepository;
 
     @Test
     public void testGenerateToken() {
