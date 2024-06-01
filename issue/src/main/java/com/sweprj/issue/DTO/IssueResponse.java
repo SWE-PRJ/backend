@@ -23,20 +23,9 @@ public class IssueResponse {
         id = issue.getId();
         title = issue.getTitle();
         description = issue.getDescription();
-
-        if (issue.getReporter() == null) {
-            reporterName = ""; // 또는 적절한 기본값 설정
-        } else {
-            reporterName = issue.getReporter().getUsername();
-        }
-
-        if (issue.getFixer() == null) {
-            fixerName = ""; // 또는 적절한 기본값 설정
-        } else {
-            fixerName = issue.getFixer().getUsername();
-        }
-
-        assigneeName = issue.getAssignee() != null ? issue.getAssignee().getIdentifier() : "";
+        reporterIdentifier = issue.getReporter() != null ? issue.getReporter().getIdentifier() : "";
+        fixerIdentifier = issue.getFixer() != null ? issue.getFixer().getIdentifier() : "";
+        assigneeIdentifier = issue.getAssignee() != null ? issue.getAssignee().getIdentifier() : "";
         priority = issue.getPriority() != null ? issue.getPriority() : null; // 필요 시 기본값 설정
         state = issue.getState() != null ? issue.getState() : IssueState.NEW; // 필요 시 기본값 설정
         projectId = issue.getProject() != null ? issue.getProject().getId() : -1L;
@@ -47,9 +36,9 @@ public class IssueResponse {
     private Long id;
     private String title;
     private String description;
-    private String reporterName;
-    private String fixerName;
-    private String assigneeName;
+    private String reporterIdentifier;
+    private String fixerIdentifier;
+    private String assigneeIdentifier;
     private IssuePriority priority;
     private IssueState state;
     private Long projectId;
