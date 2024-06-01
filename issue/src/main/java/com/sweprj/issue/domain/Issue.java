@@ -1,11 +1,14 @@
 package com.sweprj.issue.domain;
 
+import com.sweprj.issue.domain.enums.IssuePriority;
 import com.sweprj.issue.domain.enums.IssueState;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -14,6 +17,8 @@ import java.util.List;
 
 @Entity
 @Data
+@DynamicUpdate
+@DynamicInsert
 @NoArgsConstructor
 @AllArgsConstructor
 @Transactional
@@ -35,8 +40,9 @@ public class Issue {
     @JoinColumn(name = "assignee_id")
     private User assignee;
 
-
-    private String priority;
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(10) DEFAULT 'major'")
+    private IssuePriority priority;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(10) DEFAULT 'NEW'")
