@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class IssueAssigneeRequest {
 
-    private String identifier;
+    private String userIdentifier;
 
 }
