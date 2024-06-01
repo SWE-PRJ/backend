@@ -90,9 +90,9 @@ public class IssueService {
     }
 
     //할당된 이슈 검색 (DEV)
-    public IssueListResponse findIssueAssignedTo(Long userId) { //user가 developer가 맞는지 확인하는 과정 필요
+    public IssueListResponse findIssueAssignedTo(String userIdentifier) { //user가 developer가 맞는지 확인하는 과정 필요
         IssueListResponse issueListResponse = new IssueListResponse();
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findByIdentifier(userIdentifier).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         List<Issue> issues = issueRepository.getIssuesByAssignee(user);
 
         issueListResponse.addAllIssues(issues);
@@ -116,9 +116,9 @@ public class IssueService {
 
     //이슈 할당 (PL)
     public IssueResponse setIssueAssignee(Long id, IssueAssigneeRequest issueAssigneeRequest) {
-        Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getIdentifier());
+        Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier());
         Issue issue = issueRepository.getById(id);
-
+        System.out.println(issueAssigneeRequest.getUserIdentifier());
         if (user == null) {
             throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
         }
