@@ -3,6 +3,7 @@ package com.sweprj.issue.service;
 import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.domain.Issue;
+import com.sweprj.issue.domain.Project;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.enums.IssuePriority;
 import com.sweprj.issue.domain.enums.IssueState;
@@ -11,6 +12,7 @@ import com.sweprj.issue.exception.InvalidIssueStateException;
 import com.sweprj.issue.exception.ResourceNotFoundException;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
+import com.sweprj.issue.repository.ProjectUserRepository;
 import com.sweprj.issue.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,12 +27,14 @@ public class IssueService {
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ProjectUserRepository projectUserRepository;
 
-    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
+    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider, ProjectUserRepository projectUserRepository) {
         this.projectRepository = projectRepository;
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.projectUserRepository = projectUserRepository;
     }
 
     //이슈 생성 (TESTER)
@@ -118,10 +122,16 @@ public class IssueService {
     public IssueResponse setIssueAssignee(Long id, IssueAssigneeRequest issueAssigneeRequest) {
         Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier());
         Issue issue = issueRepository.getById(id);
-        System.out.println(issueAssigneeRequest.getUserIdentifier());
+        Project project = issue.getProject();
+
         if (user == null) {
             throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
         }
+
+        if (projectUserRepository.getProjectUserByProjectAndUser(project, user.get()) == null) {
+            throw new ResourceNotFoundException("해당 유저는 해당 이슈가 발생된 프로젝트에 속하지 않았습니다.");
+        }
+
 
         issue.setAssignee(user.get());
         issue.setState(IssueState.ASSIGNED);
