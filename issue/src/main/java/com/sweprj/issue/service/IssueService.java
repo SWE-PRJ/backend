@@ -36,7 +36,6 @@ public class IssueService {
             throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
         }
 
-
         Issue issue = new Issue();
 
         issue.setTitle(issueRequest.getTitle());

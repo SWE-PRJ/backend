@@ -25,7 +25,7 @@ public class IssueResponse {
         description = issue.getDescription();
         reporterIdentifier = issue.getReporter() != null ? issue.getReporter().getIdentifier() : "";
         fixerIdentifier = issue.getFixer() != null ? issue.getFixer().getIdentifier() : "";
-        assigneeIdentifier = issue.getDescription() != null ? issue.getAssignee().getIdentifier() : "";
+        assigneeIdentifier = issue.getAssignee() != null ? issue.getAssignee().getIdentifier() : "";
         priority = issue.getPriority() != null ? issue.getPriority() : null; // 필요 시 기본값 설정
         state = issue.getState() != null ? issue.getState() : IssueState.NEW; // 필요 시 기본값 설정
         projectId = issue.getProject() != null ? issue.getProject().getId() : -1L;
