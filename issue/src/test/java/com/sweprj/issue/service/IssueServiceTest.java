@@ -1,87 +1,145 @@
 package com.sweprj.issue.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sweprj.issue.DTO.IssueRequest;
-import com.sweprj.issue.DTO.IssueResponse;
-import com.sweprj.issue.config.WithMockCustomUser;
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
-import com.sweprj.issue.domain.Issue;
+import com.sweprj.issue.domain.Project;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.account.Admin;
-import com.sweprj.issue.domain.enums.IssuePriority;
+import com.sweprj.issue.exception.InvalidIssuePriorityException;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
 import com.sweprj.issue.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import jakarta.persistence.EntityManager;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Optional;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(SpringExtension.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest
-class IssueServiceTest {
+@Transactional
+public class IssueServiceTest {
+    @Autowired
+    private UserService userService;
 
-    @Mock
-    private IssueRepository issueRepository;
-
-    @Mock
-    private ProjectRepository projectRepository;
-
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @InjectMocks
-    private IssueService issueService;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
-    @BeforeEach
-    void setUp() {
-        // Setting up common mocks
+    @Autowired
+    private AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    @Autowired
+    private EntityManager em;
+
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    private IssueRepository issueRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+    }
+
+    private String getAdminToken() {
+        // 유저 계정 생성
+        String identifier = "admin";
+        String password = "adminPassword";
+        User user = new Admin(identifier, passwordEncoder.encode(password));
+
+        userRepository.save(user);
+
+        // 인증 객체 생성
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(identifier, password);
+
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // 토큰 생성
+        return jwtTokenProvider.generateToken(authentication);
     }
 
     @Test
-    @WithMockCustomUser(userId = 1L, role = "ROLE_USER")
-    void testCreateIssue() {
-        // Set up mocks
-        Long userId = 1L;
-        Long projectId = 1L;
+    public void createIssue_validToken_createsIssue() throws Exception {
 
-        User mockUser = new Admin();
-        mockUser.setUserId(userId);
-
-        Issue issue = new Issue();
-        issue.setId(1L);
-        issue.setTitle("Test Issue");
-        issue.setPriority(IssuePriority.major);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-        when(projectRepository.findById(projectId)).thenReturn(Optional.of(Mockito.mock(com.sweprj.issue.domain.Project.class)));
-        when(issueRepository.save(any(Issue.class))).thenReturn(issue);
-
-        // Prepare IssueRequest
         IssueRequest issueRequest = new IssueRequest();
         issueRequest.setTitle("Test Issue");
         issueRequest.setDescription("Test Description");
         issueRequest.setPriority("major");
 
-        // Test createIssue method
-        IssueResponse issueResponse = issueService.createIssue(projectId, issueRequest);
+        String token = getAdminToken();
+        Project project = new Project();
+        project.setName("Test Project");
+        projectRepository.save(project);
+        Long projectId = project.getId();
 
-        // Assertions
-        assertEquals("Test Issue", issueResponse.getTitle());
-        assertEquals(1L, issueResponse.getId());
-        assertEquals("Test Description", issueResponse.getDescription());
+        mockMvc.perform(post("/api/projects/"+projectId+"/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(issueRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNumber());
+
+        em.flush();
     }
+
+    @Test
+    public void createIssue_invalidPriority_throwsException() throws Exception {
+
+        IssueRequest issueRequest = new IssueRequest();
+        issueRequest.setTitle("Test Issue");
+        issueRequest.setDescription("Test Description");
+        issueRequest.setPriority("INVALID_PRIORITY");
+
+
+        String token = getAdminToken();
+        Project project = new Project();
+        project.setName("Test Project");
+        projectRepository.save(project);
+        Long projectId = project.getId();
+
+        mockMvc.perform(post("/api/projects/"+projectId+"/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(issueRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidIssuePriorityException));
+    }
+
+    // Additional test cases can be added here for other functionalities like updating and retrieving issues
 }
