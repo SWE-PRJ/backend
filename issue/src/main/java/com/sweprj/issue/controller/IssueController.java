@@ -30,7 +30,7 @@ public class IssueController {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(issueService.createIssue(projectId, reporter, issueRequest));
+        return ResponseEntity.ok(issueService.createIssue(projectId, issueRequest));
     }
 
     //프로젝트의 전체 이슈 검색 (PL)
