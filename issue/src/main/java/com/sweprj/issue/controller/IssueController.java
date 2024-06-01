@@ -1,5 +1,6 @@
 package com.sweprj.issue.controller;
 
+import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
@@ -8,6 +9,12 @@ import com.sweprj.issue.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 @Controller
 @RequestMapping("/api")
@@ -74,5 +81,24 @@ public class IssueController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(issueService.setIssueAssignee(id, issueAssigneeRequest));
+    }
+
+    @GetMapping("/projects/{projectId}/issues/statistics")
+    public ResponseEntity<IssueStatisticsDTO> getIssueStatistics(
+            @PathVariable Long projectId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cal = Calendar.getInstance();
+
+        try {
+            Date start = formatter.parse(startDate);
+            Date end = formatter.parse(endDate);
+            IssueStatisticsDTO stats = issueService.getIssueStatistics(projectId, start, end);
+            return ResponseEntity.ok(stats);
+        } catch (ParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 }

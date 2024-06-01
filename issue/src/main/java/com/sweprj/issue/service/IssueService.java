@@ -1,6 +1,7 @@
 package com.sweprj.issue.service;
 
 import com.sweprj.issue.DTO.*;
+import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.enums.IssueState;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.*;
 
 @Service
 public class IssueService {
@@ -111,5 +113,51 @@ public class IssueService {
         issueRepository.save(issue);
 
         return new IssueResponse(issue);
+    }
+
+    //이슈 통계
+    public IssueStatisticsDTO getIssueStatistics(Long projectId, Date start, Date end) {
+        IssueStatisticsDTO stats = new IssueStatisticsDTO();
+
+        long totalIssues = issueRepository.count();
+        stats.setTotalIssues(totalIssues);
+
+        List<Object[]> issuesByState = issueRepository.countIssuesByState(projectId);
+        Map<String, Long> issuesByStateMap = new HashMap<>();
+        for (Object[] row : issuesByState) {
+            issuesByStateMap.put(row[0].toString(), (Long) row[1]);
+        }
+        stats.setIssuesByStatus(issuesByStateMap);
+
+        List<Object[]> issuesByPriority = issueRepository.countIssuesByPriority(projectId);
+        Map<String, Long> issuesByPriorityMap = new HashMap<>();
+        for (Object[] row : issuesByPriority) {
+            issuesByPriorityMap.put(row[0].toString(), (Long) row[1]);
+        }
+        stats.setIssuesByPriority(issuesByPriorityMap);
+
+        // Calculate monthly statistics
+        List<Object[]> issuesByMonth = issueRepository.countIssuesByMonth(projectId, start, end);
+        Map<String, Long> issuesByMonthMap = new HashMap<>();
+        for (Object[] row : issuesByMonth) {
+            issuesByMonthMap.put(row[0].toString(), (Long) row[1]);
+        }
+        stats.setIssuesByMonth(issuesByMonthMap);
+
+        // Calculate daily statistics per month
+        List<Object[]> issuesByDayPerMonth = issueRepository.countIssuesByDayPerMonth(projectId, start, end);
+        Map<String, Map<String, Long>> issuesByDayPerMonthMap = new HashMap<>();
+        for (Object[] row : issuesByDayPerMonth) {
+            String month = row[0].toString();
+            String day = row[1].toString();
+            Long count = (Long) row[2];
+            if (!issuesByDayPerMonthMap.containsKey(month)) {
+                issuesByDayPerMonthMap.put(month, new HashMap<>());
+            }
+            issuesByDayPerMonthMap.get(month).put(day, count);
+        }
+        stats.setIssuesByDayPerMonth(issuesByDayPerMonthMap);
+
+        return stats;
     }
 }
