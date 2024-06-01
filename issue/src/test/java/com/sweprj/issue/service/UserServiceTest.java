@@ -206,7 +206,7 @@ public void adminSignupDuplicateUsername() throws Exception {
 
     @Test
     public void loginFailure() throws Exception {
-        UserLogInRequest loginRequest = new UserLogInRequest("password", "nonExistentUser");
+        UserLogInRequest loginRequest = new UserLogInRequest("nonExistentUser", "password");
 
         mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
