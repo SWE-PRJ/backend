@@ -36,7 +36,7 @@ public class IssueResponse {
             fixerName = issue.getFixer().getUsername();
         }
 
-        assigneeName = issue.getAssignee() != null ? issue.getAssignee().getName() : "";
+        assigneeName = issue.getAssignee() != null ? issue.getAssignee().getIdentifier() : "";
         priority = issue.getPriority() != null ? issue.getPriority() : null; // 필요 시 기본값 설정
         state = issue.getState() != null ? issue.getState() : IssueState.NEW; // 필요 시 기본값 설정
         projectId = issue.getProject() != null ? issue.getProject().getId() : -1L;

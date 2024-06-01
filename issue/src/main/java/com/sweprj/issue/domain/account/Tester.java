@@ -7,8 +7,8 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("tester")
 public class Tester extends User {
-    public Tester(String name, String identifier, String password) {
-        super(name, identifier, password);
+    public Tester(String identifier, String password) {
+        super(identifier, password);
     }
 
     public Tester() {
