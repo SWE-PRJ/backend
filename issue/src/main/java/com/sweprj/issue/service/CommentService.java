@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CommentService {
@@ -49,6 +50,10 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
         return convertToDTO(comment);
     }
+    public List<CommentDTO> getAllComments(Long issueId) {
+        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
+        return convertToDTO(issue.getComments());
+    }
 
     public CommentDTO updateComment(Long commentId, String content) {
         Comment comment = commentRepository.findById(commentId)
@@ -75,6 +80,11 @@ public class CommentService {
         commentDTO.setCommentedAt(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(comment.getCommentedAt()));
         commentDTO.setIssueId(comment.getIssue().getId());
         return commentDTO;
+    }
+    private List<CommentDTO> convertToDTO(List<Comment> comments) {
+        return comments.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     private void checkIfAuthorized(Comment comment) {
