@@ -1,11 +1,12 @@
 package com.sweprj.issue.controller;
 
-import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
-import com.sweprj.issue.domain.enums.IssuePriority;
-import com.sweprj.issue.exception.InvalidIssuePriorityException;
+import com.sweprj.issue.repository.IssueRepository;
+import com.sweprj.issue.repository.UserRepository;
+import com.sweprj.issue.service.DevRecommendationService;
+import com.sweprj.issue.service.EmbeddingService;
 import com.sweprj.issue.service.IssueService;
 import com.sweprj.issue.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 @Controller
 @RequestMapping("/api")
@@ -24,10 +24,18 @@ public class IssueController {
 
     private final IssueService issueService;
     private final UserService userService;
+    private final IssueRepository issueRepository;
+    private final EmbeddingService embeddingService;
+    private final DevRecommendationService recommendationService;
+    private final UserRepository userRepository;
 
-    public IssueController(IssueService issueService, UserService userService) {
+    public IssueController(IssueService issueService, UserService userService, IssueRepository issueRepository, EmbeddingService embeddingService, DevRecommendationService recommendationService, UserRepository userRepository) {
         this.issueService = issueService;
         this.userService = userService;
+        this.issueRepository = issueRepository;
+        this.embeddingService = embeddingService;
+        this.recommendationService = recommendationService;
+        this.userRepository = userRepository;
     }
 
     //프로젝트에서 이슈 생성 (TESTER)
@@ -77,6 +85,8 @@ public class IssueController {
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
+        User user = userRepository.findByIdentifier(issueAssigneeRequest.getIdentifier()).get();
+        embeddingService.createIssueEmbedding(issue, user);
         return ResponseEntity.ok(issueService.setIssueAssignee(id, issueAssigneeRequest));
     }
 
@@ -98,4 +108,13 @@ public class IssueController {
         }
 
     }
+
+    @PostMapping("/issues/{issueId}/recommend")
+    public ResponseEntity<UserRecommendDTO> recommendDeveloper(@PathVariable Long issueId) {
+        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new RuntimeException("Issue not found."));
+        User recommendedUser = recommendationService.recommendDeveloperForIssue(issue);
+        UserRecommendDTO userRecommendDTO = new UserRecommendDTO(recommendedUser.getUserId(), recommendedUser.getUsername());
+        return ResponseEntity.ok(userRecommendDTO);
+    }
+
 }
