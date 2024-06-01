@@ -59,7 +59,7 @@ public class IssueController {
     }
 
     //이슈 상태 변경 (PL, DEV, TESTER)
-    @PatchMapping("/projects/{projectId}/issues/{issueId}")
+    @PatchMapping("/issues/{issueId}")
     @ResponseBody
     public ResponseEntity<IssueResponse> changeIssue(@PathVariable("issueId") Long id, @RequestBody IssueStateRequest issueStateRequest) {
         Issue issue = issueService.findById(id);
