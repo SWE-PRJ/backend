@@ -32,9 +32,16 @@ public class CommentService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public CommentDTO createComment(Long issueId, Long userId, String content) {
-        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public CommentDTO createComment(Long issueId, String content) {
+        Issue issue = issueRepository.findById(issueId).orElseThrow(()
+                -> new ResourceNotFoundException("Issue not found"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String token = (String) authentication.getCredentials();
+        Long userId = jwtTokenProvider.getUserFromJwt(token);
+
+        User user = userRepository.findById(userId).orElseThrow(()
+                -> new ResourceNotFoundException("User not found"));
 
         Comment comment = new Comment();
         comment.setIssue(issue);

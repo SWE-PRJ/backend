@@ -44,11 +44,11 @@ public class UserService implements UserDetailsService {
 
     //admin 전용 회원가입
     @Transactional
-    public Long register(UserSignInRequest dto, String role, String adminIdentifier) {
-        User adminUser = userRepository.findByIdentifier(adminIdentifier)
-                .orElseThrow(() -> new IllegalArgumentException("Admin user not found"));
+    public Long register(UserSignInRequest dto, String role) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String token = (String) authentication.getCredentials();
 
-        if (!adminUser.getRole().equals("ROLE_ADMIN")) {
+        if (!jwtTokenProvider.getRoleFromJwt(token).equals("ROLE_ADMIN")) {
             throw new AccessDeniedException("Only admin can register users");
         }
 
