@@ -1,17 +1,17 @@
 package com.sweprj.issue.controller;
 
 import com.sweprj.issue.DTO.UserLogInRequest;
+import com.sweprj.issue.DTO.UserResponse;
 import com.sweprj.issue.DTO.UserSignInRequest;
+import com.sweprj.issue.domain.User;
 import com.sweprj.issue.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -42,6 +42,12 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> login(@RequestBody UserLogInRequest request) {
         Map<String, Object> response = userService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
 }
