@@ -52,7 +52,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    private SecretKey getSigningKey() { // 서명 키를 생성하는 메서드.
+    protected SecretKey getSigningKey() { // 서명 키를 생성하는 메서드.
         String encodedKey= Base64.getEncoder().encodeToString(JWT_SECRET.getBytes());
         return Keys.hmacShaKeyFor(encodedKey.getBytes());   // HMAC SHA 알고리즘으로 SecretKey를 생성
     }
