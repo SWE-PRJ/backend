@@ -1,6 +1,7 @@
 package com.sweprj.issue.service;
 
 import com.sweprj.issue.DTO.ProjectDTO;
+import com.sweprj.issue.DTO.ProjectUsersResponse;
 import com.sweprj.issue.domain.Project;
 import com.sweprj.issue.domain.ProjectUser;
 import com.sweprj.issue.domain.User;
@@ -62,6 +63,14 @@ public class ProjectService {
         projectUser.setUser(user);
 
         projectUserRepository.save(projectUser);
+    }
+
+    public ProjectUsersResponse getUsersInProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found with id" + projectId));
+        List<ProjectUser> projectUsers = projectUserRepository.getProjectUsersByProject(project);
+
+        return new ProjectUsersResponse(project, projectUsers);
     }
 
     private ProjectDTO convertToDTO(Project project) {
