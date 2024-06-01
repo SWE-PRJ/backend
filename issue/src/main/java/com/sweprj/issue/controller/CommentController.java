@@ -18,11 +18,8 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<CommentDTO> createComment(@PathVariable Long issueId, @RequestBody Map<String, Object> requestBody) {
-        Long userId = Long.valueOf(requestBody.get("userId").toString());
-        String content = requestBody.get("content").toString();
-
-        CommentDTO comment = commentService.createComment(issueId, userId, content);
+    public ResponseEntity<CommentDTO> createComment(@PathVariable Long issueId, @RequestParam String content) {
+        CommentDTO comment = commentService.createComment(issueId, content);
         return ResponseEntity.ok(comment);
     }
 

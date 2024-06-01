@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -44,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/signup").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/projects").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/projects/*/issues").hasAnyRole("ADMIN", "TESTER")
                         .requestMatchers(HttpMethod.POST, "/api/issues/*/comments").hasAnyRole("ADMIN", "TESTER", "DEV")
                         .requestMatchers(HttpMethod.GET, "/api/projects/*/issues").permitAll()
