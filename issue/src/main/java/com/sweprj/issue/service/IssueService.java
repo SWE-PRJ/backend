@@ -176,6 +176,9 @@ public class IssueService {
         if (user == null) {
             throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
         }
+        if (user.get() == issue.getReporter()) {
+            return new IssueResponse(issue);
+        }
 
         issue.setAssignee(user.get());
         issue.setState(IssueState.ASSIGNED);
