@@ -3,6 +3,7 @@ package com.sweprj.issue.repository;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.Project;
 import com.sweprj.issue.domain.User;
+import com.sweprj.issue.domain.enums.IssueState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,9 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     // 특정 프로젝트에 속한 이슈 모음
     List<Issue> getIssuesByProject(Project project);
+
+    // 특정 프로젝트에서 특정 state를 가진 이슈 모음
+    List<Issue> getIssuesByProjectAndState(Project project, IssueState issueState);
 
     @Query("SELECT COUNT(i) " +
             "FROM Issue i " +

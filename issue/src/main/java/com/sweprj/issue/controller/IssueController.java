@@ -9,6 +9,7 @@ import com.sweprj.issue.repository.UserRepository;
 import com.sweprj.issue.service.DevRecommendationService;
 import com.sweprj.issue.service.EmbeddingService;
 import com.sweprj.issue.service.IssueService;
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +50,12 @@ public class IssueController {
     @ResponseBody
     public ResponseEntity<IssueListResponse> findIssuesIn(@PathVariable("projectId") Long projectId) {
         return ResponseEntity.ok(issueService.findByProject(projectId));
+    }
+
+    @GetMapping("/projects/{projectId}/issues/{state}")
+    @ResponseBody
+    public ResponseEntity<IssueListResponse> findIssuesIn(@PathVariable("projectId") Long projectId, @PathVariable("state") String state) {
+        return ResponseEntity.ok(issueService.findByProjectAndState(projectId, state));
     }
 
     //유저에게 할당된 이슈 검색 (DEV)
