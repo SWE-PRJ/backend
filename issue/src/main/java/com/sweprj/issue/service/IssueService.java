@@ -111,6 +111,10 @@ public class IssueService {
         if (!IssueState.isValid(issueStateRequest.getState())) {
             throw new InvalidIssueStateException(issueStateRequest.getState() + "는 잘못된 이슈 상태입니다.");
         }
+        if (IssueState.RESOLVED == IssueState.fromString(issueStateRequest.getState())) {
+            issue.setFixer(issue.getAssignee());
+        }
+
         issue.setState(IssueState.fromString(issueStateRequest.getState()));
         issueRepository.save(issue); // 변경된 상태 저장
 
