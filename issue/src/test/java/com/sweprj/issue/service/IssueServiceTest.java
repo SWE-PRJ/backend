@@ -28,8 +28,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Optional;
+
 import static org.junit.Assert.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,12 +79,18 @@ public class IssueServiceTest {
     }
 
     private String getAdminToken() {
-        // 유저 계정 생성
-        String identifier = "admin";
+        String identifier = "testAdmin";
         String password = "adminPassword";
-        User user = new Admin(identifier, passwordEncoder.encode(password));
+        Optional<User> existingUser = userRepository.findByIdentifier(identifier);
 
-        userRepository.save(user);
+        User user;
+        if (existingUser.isPresent()) {
+            user = existingUser.get();
+        } else {
+            // 존재하지 않는 경우에만 새로운 유저 생성
+            user = new Admin(identifier, passwordEncoder.encode(password));
+            userRepository.save(user);
+        }
 
         // 인증 객체 생성
         UsernamePasswordAuthenticationToken authenticationToken =
@@ -95,7 +104,7 @@ public class IssueServiceTest {
     }
 
     @Test
-    public void createIssue_validToken_createsIssue() throws Exception {
+    public void createIssue_validToken_SUCCESS() throws Exception {
 
         IssueRequest issueRequest = new IssueRequest();
         issueRequest.setTitle("Test Issue");
@@ -119,7 +128,7 @@ public class IssueServiceTest {
     }
 
     @Test
-    public void createIssue_invalidPriority_throwsException() throws Exception {
+    public void createIssue_invalidPriority_EXCEPTION() throws Exception {
 
         IssueRequest issueRequest = new IssueRequest();
         issueRequest.setTitle("Test Issue");
@@ -141,6 +150,59 @@ public class IssueServiceTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidIssuePriorityException));
     }
 
-    // Additional test cases can be added here for other functionalities like updating and retrieving issues
+    @Test
+    public void findIssuesInProject_validToken_SUCCESS() throws Exception {
+        String token = getAdminToken();
+        Project project = new Project();
+        project.setName("Test Project");
+        projectRepository.save(project);
+        Long projectId = project.getId();
+
+        mockMvc.perform(get("/api/projects/" + projectId + "/issues")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.issues").isArray());
+    }
+
+    @Test
+    public void browseAssignedIssues_validToken_SUCCESS() throws Exception {
+        String token = getAdminToken();
+        User user = userRepository.findByIdentifier("admin").orElseThrow();
+        String userIdentifier = user.getIdentifier();
+
+        mockMvc.perform(get("/api/users/" + userIdentifier + "/issues")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.issues").isArray());
+    }
+
+    @Test
+    public void getIssue_validToken_SUCCESS() throws Exception {
+        String token = getAdminToken();
+        Project project = new Project();
+        project.setName("Test Project");
+        projectRepository.save(project);
+        Long projectId = project.getId();
+
+        IssueRequest issueRequest = new IssueRequest();
+        issueRequest.setTitle("Test Issue");
+        issueRequest.setDescription("Test Description");
+        issueRequest.setPriority("major");
+        String issueJson = new ObjectMapper().writeValueAsString(issueRequest);
+
+        mockMvc.perform(post("/api/projects/" + projectId + "/issues")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(issueJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNumber());
+
+        Long issueId = issueRepository.findAll().get(0).getId();
+
+        mockMvc.perform(get("/api/issues/" + issueId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(issueId));
+    }
 }
 
