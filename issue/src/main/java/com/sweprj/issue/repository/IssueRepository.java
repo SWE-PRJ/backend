@@ -36,6 +36,9 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
             "GROUP BY DATE_FORMAT(i.reportedAt, '%Y-%m'), DAY(i.reportedAt)")
     List<Object[]> countIssuesByDayPerMonth(Long projectId, Date startDate, Date endDate);
 
-    // 특정 개발자에게 할당된 이슈 모음
-    List<Issue> getIssuesByAssignee(User user);
+    // 특정 프로젝트에 속하고 특정 개발자에게 할당된 이슈들 서칭
+    List<Issue> getIssuesByProjectAndAssignee(Project project, User user);
+
+    // 특정 프로젝트에 속하고 특정 테스터가 제안한 이슈들 서칭
+    List<Issue> getIssuesByProjectAndReporter(Project project, User user);
 }

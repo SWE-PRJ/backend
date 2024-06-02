@@ -116,10 +116,27 @@ public class IssueService {
     }
 
     //할당된 이슈 검색 (DEV)
-    public IssueListResponse findIssueAssignedTo(String userIdentifier) {
+    public IssueListResponse findIssuesAssignedTo(Long projectId, String userIdentifier) {
+        checkingInProject(projectId);
+
         IssueListResponse issueListResponse = new IssueListResponse();
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         User user = userRepository.findByIdentifier(userIdentifier).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<Issue> issues = issueRepository.getIssuesByAssignee(user);
+        List<Issue> issues = issueRepository.getIssuesByProjectAndAssignee(project, user);
+
+        issueListResponse.addAllIssues(issues);
+
+        return issueListResponse;
+    }
+
+    // 제안한 이슈 검색 (TESTER)
+    public IssueListResponse findIssuesReportedBy(Long projectId, String userIdentifier) {
+        checkingInProject(projectId);
+
+        IssueListResponse issueListResponse = new IssueListResponse();
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findByIdentifier(userIdentifier).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<Issue> issues = issueRepository.getIssuesByProjectAndReporter(project, user);
 
         issueListResponse.addAllIssues(issues);
 
