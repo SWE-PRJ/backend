@@ -2,6 +2,7 @@ package com.sweprj.issue.service;
 
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.IssueEmbedding;
+import com.sweprj.issue.domain.Project;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.repository.IssueEmbeddingRepository;
 import com.sweprj.issue.repository.UserRepository;
@@ -29,18 +30,21 @@ public class DevRecommendationService {
         List<User> users = userRepository.findAll();
         User bestMatch = null;
         double highestAverageSimilarity = -1;
+        Project project = issue.getProject();
 
         for (User user : users) {
-            List<IssueEmbedding> userEmbeddings = issueEmbeddingRepository.findByUserUserId(user.getUserId());
-            if (!userEmbeddings.isEmpty()) {
-                double totalSimilarity = 0;
-                for (IssueEmbedding userEmbedding : userEmbeddings) {
-                    totalSimilarity += calculateCosineSimilarity(issueEmbedding, userEmbedding.getEmbeddingArray());
-                }
-                double averageSimilarity = totalSimilarity / userEmbeddings.size();
-                if (averageSimilarity > highestAverageSimilarity) {
-                    highestAverageSimilarity = averageSimilarity;
-                    bestMatch = user;
+            if (user.getRole().equals("ROLE_DEV") && isUserAssociatedWithProject(user, project)) {
+                List<IssueEmbedding> userEmbeddings = issueEmbeddingRepository.findByUserUserId(user.getUserId());
+                if (!userEmbeddings.isEmpty()) {
+                    double totalSimilarity = 0;
+                    for (IssueEmbedding userEmbedding : userEmbeddings) {
+                        totalSimilarity += calculateCosineSimilarity(issueEmbedding, userEmbedding.getEmbeddingArray());
+                    }
+                    double averageSimilarity = totalSimilarity / userEmbeddings.size();
+                    if (averageSimilarity > highestAverageSimilarity) {
+                        highestAverageSimilarity = averageSimilarity;
+                        bestMatch = user;
+                    }
                 }
             }
         }
@@ -58,5 +62,9 @@ public class DevRecommendationService {
             normB += Math.pow(vecB[i], 2);
         }
         return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+    private boolean isUserAssociatedWithProject(User user, Project project) {
+        return user.getProjects().stream()
+                .anyMatch(projectUser -> projectUser.getProject().equals(project));
     }
 }
