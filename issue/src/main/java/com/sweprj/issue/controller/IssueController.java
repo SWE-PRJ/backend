@@ -3,12 +3,12 @@ package com.sweprj.issue.controller;
 import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
+import com.sweprj.issue.exception.ResourceNotFoundException;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.UserRepository;
 import com.sweprj.issue.service.DevRecommendationService;
 import com.sweprj.issue.service.EmbeddingService;
 import com.sweprj.issue.service.IssueService;
-import com.sweprj.issue.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,15 +25,13 @@ import java.util.Map;
 public class IssueController {
 
     private final IssueService issueService;
-    private final UserService userService;
     private final IssueRepository issueRepository;
     private final EmbeddingService embeddingService;
     private final DevRecommendationService recommendationService;
     private final UserRepository userRepository;
 
-    public IssueController(IssueService issueService, UserService userService, IssueRepository issueRepository, EmbeddingService embeddingService, DevRecommendationService recommendationService, UserRepository userRepository) {
+    public IssueController(IssueService issueService, IssueRepository issueRepository, EmbeddingService embeddingService, DevRecommendationService recommendationService, UserRepository userRepository) {
         this.issueService = issueService;
-        this.userService = userService;
         this.issueRepository = issueRepository;
         this.embeddingService = embeddingService;
         this.recommendationService = recommendationService;
@@ -115,6 +113,9 @@ public class IssueController {
     public ResponseEntity<UserRecommendDTO> recommendDeveloper(@PathVariable Long issueId) {
         Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new RuntimeException("Issue not found."));
         User recommendedUser = recommendationService.recommendDeveloperForIssue(issue);
+        if (recommendedUser == null) {
+            throw new ResourceNotFoundException("No recommended developer found.");
+        }
         UserRecommendDTO userRecommendDTO = new UserRecommendDTO(recommendedUser.getUserId(), recommendedUser.getUsername());
         return ResponseEntity.ok(userRecommendDTO);
     }
