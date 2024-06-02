@@ -17,7 +17,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -92,8 +91,6 @@ public class IssueController {
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
-        User user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier()).get();
-        embeddingService.createIssueEmbedding(issue, user);
         return ResponseEntity.ok(issueService.setIssueAssignee(id, issueAssigneeRequest));
     }
 

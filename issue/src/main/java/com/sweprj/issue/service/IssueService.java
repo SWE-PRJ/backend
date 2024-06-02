@@ -27,14 +27,16 @@ public class IssueService {
     private final JwtTokenProvider jwtTokenProvider;
     private final ProjectUserRepository projectUserRepository;
     private final IssueEmbeddingRepository issueEmbeddingRepository;
+    private final EmbeddingService embeddingService;
 
-    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider, ProjectUserRepository projectUserRepository, IssueEmbeddingRepository issueEmbeddingRepository) {
+    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider, ProjectUserRepository projectUserRepository, IssueEmbeddingRepository issueEmbeddingRepository, EmbeddingService embeddingService) {
         this.projectRepository = projectRepository;
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.projectUserRepository = projectUserRepository;
         this.issueEmbeddingRepository = issueEmbeddingRepository;
+        this.embeddingService = embeddingService;
     }
 
     private void checkingInProject(Long projectId) {
@@ -151,7 +153,10 @@ public class IssueService {
             throw new InvalidIssueStateException(issueStateRequest.getState() + "는 잘못된 이슈 상태입니다.");
         }
         if (IssueState.FIXED == IssueState.fromString(issueStateRequest.getState())) {
-            issue.setFixer(issue.getAssignee());
+
+            User fixer = issue.getAssignee();
+            issue.setFixer(fixer);
+            embeddingService.createIssueEmbedding(issue, fixer);
         }
 
         issue.setState(IssueState.fromString(issueStateRequest.getState()));
