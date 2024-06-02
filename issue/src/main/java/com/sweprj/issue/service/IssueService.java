@@ -150,7 +150,7 @@ public class IssueService {
         if (!IssueState.isValid(issueStateRequest.getState())) {
             throw new InvalidIssueStateException(issueStateRequest.getState() + "는 잘못된 이슈 상태입니다.");
         }
-        if (IssueState.RESOLVED == IssueState.fromString(issueStateRequest.getState())) {
+        if (IssueState.FIXED == IssueState.fromString(issueStateRequest.getState())) {
             issue.setFixer(issue.getAssignee());
         }
 
