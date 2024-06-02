@@ -3,6 +3,7 @@ package com.sweprj.issue.shell;
 import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
 import com.sweprj.issue.config.jwt.UserAuthentication;
+import com.sweprj.issue.service.CommentService;
 import com.sweprj.issue.service.IssueService;
 import com.sweprj.issue.service.ProjectService;
 import com.sweprj.issue.service.UserService;
@@ -30,6 +31,7 @@ public class CLI {
     private final ProjectService projectService;
     private final IssueService issueService;
     private final UserService userService;
+    private final CommentService commentService;
 
     private Long currentUserId;
     private String currentUserRole;
@@ -37,6 +39,10 @@ public class CLI {
 
     @ShellMethod("Sign up")
     public String signup(String identifier, String password, String role) {
+        authenticate();
+        if (!currentUserRole.equals("ROLE_ADMIN")) {
+            return "Only admin can sign up new users";
+        }
         UserSignInRequest request = new UserSignInRequest();
         request.setIdentifier(identifier);
         request.setPassword(password);
@@ -89,9 +95,18 @@ public class CLI {
     }
 
     @ShellMethod("List issues in a project")
-    public IssueListResponse listIssues(@ShellOption Long projectId) {
+    public String listIssues(@ShellOption Long projectId) {
         authenticate();
-        return issueService.findByProject(projectId);
+        StringBuilder out = new StringBuilder("Issues: \n");
+        IssueListResponse issues = issueService.findByProject(projectId);
+        if (issues.getIssues().isEmpty()) {
+            return "No issues found";
+        }
+        for (IssueResponse issue : issues.getIssues()) {
+            out.append(issue.getId()).append(": ").append(issue.getTitle()).append("\n");
+        }
+
+        return out.toString();
     }
 
     @ShellMethod("Show details of an issue")
@@ -114,6 +129,54 @@ public class CLI {
 
         IssueResponse issue = issueService.createIssue(projectId, issueRequestDTO);
         return "Issue created: " + issue.getTitle();
+    }
+    @ShellMethod("Create a comment")
+    public String createComment(Long issueId, String content) {
+        authenticate();
+        StringBuilder out = new StringBuilder("Comment Created: \n");
+        CommentDTO comment = commentService.createComment(issueId, content);
+        out.append(comment.getId()).append(": ").append(comment.getContent()).append("\n");
+        return out.toString();
+    }
+
+    @ShellMethod("Get a comment")
+    public String getComment(Long commentId) {
+        authenticate();
+        StringBuilder out = new StringBuilder("Comment: \n");
+        CommentDTO comment = commentService.getComment(commentId);
+        if (comment == null) {
+            return "Comment not found";
+        }
+        out.append(comment.getId()).append(": ").append(comment.getContent()).append("\n");
+        return out.toString();
+    }
+
+    @ShellMethod("Get all comments for an issue")
+    public String getAllComments(Long issueId) {
+        authenticate();
+        StringBuilder out = new StringBuilder("Comments: \n");
+        List<CommentDTO> comments = commentService.getAllComments(issueId);
+        if (comments.isEmpty()) {
+            return "No comments found";
+        }
+        for (CommentDTO comment : comments) {
+            out.append(comment.getId()).append(": ").append(comment.getContent()).append("\n");
+        }
+        return out.toString();
+    }
+
+    @ShellMethod("Update a comment")
+    public String updateComment(Long commentId, String content) {
+        authenticate();
+        CommentDTO commentDTO = commentService.updateComment(commentId, content);
+        return "Comment updated: " + commentDTO.getContent();
+    }
+
+    @ShellMethod("Delete a comment")
+    public String deleteComment(Long commentId) {
+        authenticate();
+        commentService.deleteComment(commentId);
+        return "Comment deleted";
     }
 
     @ShellMethod("Get Statistics")
