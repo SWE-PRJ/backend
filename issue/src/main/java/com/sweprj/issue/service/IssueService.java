@@ -37,8 +37,26 @@ public class IssueService {
         this.projectUserRepository = projectUserRepository;
     }
 
+    private void checkingInProject(Long projectId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String token = (String) authentication.getCredentials();
+        Long userId = jwtTokenProvider.getUserFromJwt(token);
+        User user = userRepository.getReferenceById(userId);
+        Project project = projectRepository.findById(projectId).orElseThrow(()
+                -> new ResourceNotFoundException("Project not found"));
+
+        if (user.getRole() == "ROLE_ADMIN") {
+            return;
+        }
+
+        if (projectUserRepository.getProjectUserByProjectAndUser(project, user) == null) {
+            throw new ResourceNotFoundException("해당 유저는 해당 프로젝트에 소속되지 않았습니다.");
+        }
+    }
+
     //이슈 생성 (TESTER)
     public IssueResponse createIssue(Long projectId, IssueRequest issueRequest) {
+        checkingInProject(projectId);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String token = (String) authentication.getCredentials();
         Long userId = jwtTokenProvider.getUserFromJwt(token);
@@ -75,7 +93,9 @@ public class IssueService {
 
     //이슈 상세정보 확인 (PL, DEV, TESTER)
     public IssueResponse findDTOById(Long id) {
-        return new IssueResponse(issueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Issue not found")));
+        Issue issue = findById(id);
+        checkingInProject(issue.getProject().getId());
+        return new IssueResponse(issue);
     }
 
     public Issue findById(Long id) {
@@ -85,6 +105,7 @@ public class IssueService {
 
     //프로젝트 전체 이슈 검색 (PL)
     public IssueListResponse findByProject(Long projectId) {
+        checkingInProject(projectId);
         IssueListResponse issueListResponse = new IssueListResponse();
         List<Issue> issues = issueRepository.getIssuesByProject(projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found")));
 
@@ -94,7 +115,7 @@ public class IssueService {
     }
 
     //할당된 이슈 검색 (DEV)
-    public IssueListResponse findIssueAssignedTo(String userIdentifier) { //user가 developer가 맞는지 확인하는 과정 필요
+    public IssueListResponse findIssueAssignedTo(String userIdentifier) {
         IssueListResponse issueListResponse = new IssueListResponse();
         User user = userRepository.findByIdentifier(userIdentifier).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         List<Issue> issues = issueRepository.getIssuesByAssignee(user);
@@ -107,6 +128,7 @@ public class IssueService {
     //이슈 상태 변경 (PL, DEV, TESTER)
     public IssueResponse setIssueState(Long id, IssueStateRequest issueStateRequest) {
         Issue issue = issueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
+        checkingInProject(issue.getProject().getId());
 
         if (!IssueState.isValid(issueStateRequest.getState())) {
             throw new InvalidIssueStateException(issueStateRequest.getState() + "는 잘못된 이슈 상태입니다.");
@@ -126,6 +148,7 @@ public class IssueService {
     public IssueResponse setIssueAssignee(Long id, IssueAssigneeRequest issueAssigneeRequest) {
         Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier());
         Issue issue = issueRepository.getById(id);
+        checkingInProject(issue.getProject().getId());
         Project project = issue.getProject();
 
         if (user == null) {
