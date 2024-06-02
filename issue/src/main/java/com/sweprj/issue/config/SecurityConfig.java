@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/issues/*/comments").hasAnyRole("ADMIN", "TESTER", "DEV", "PL")
                         .requestMatchers(HttpMethod.GET, "/api/projects/*/issues").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/projects/*/developers/*/issues").hasAnyRole("ADMIN", "DEV")
-                        .requestMatchers(HttpMethod.GET, "/api/projects/*/tester/*/issues").hasAnyRole("ADMIN", "TESTER")
+                        .requestMatchers(HttpMethod.GET, "/api/projects/*/testers/*/issues").hasAnyRole("ADMIN", "TESTER")
                         .requestMatchers(HttpMethod.PATCH, "/api/projects/*/issues/*").hasAnyRole("ADMIN", "PL", "DEV", "TESTER")
                         .requestMatchers(HttpMethod.POST, "/api/issues/*").hasAnyRole("ADMIN", "PL")
                         .requestMatchers(HttpMethod.POST, "/api/projects/{projectId}/{identifier}").hasRole("ADMIN")
