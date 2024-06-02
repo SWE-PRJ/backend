@@ -8,18 +8,16 @@ import com.sweprj.issue.domain.enums.IssuePriority;
 import com.sweprj.issue.domain.enums.IssueState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,13 +123,13 @@ public class IssueRepositoryTest {
 
     @Test
     void testCountIssuesByState() {
-        List<Object[]> results = issueRepository.countIssuesByState(project.getId());
+        List<Object[]> results = issueRepository.countIssuesByState(project.getId(), new Date(123, 1, 1, 0, 0, 0), new Date(123, 12, 31, 23, 59, 59));
         assertThat(results).hasSize(5); // 변경된 코드에 맞게 수정
     }
 
     @Test
     void testCountIssuesByPriority() {
-        List<Object[]> results = issueRepository.countIssuesByPriority(project.getId());
+        List<Object[]> results = issueRepository.countIssuesByPriority(project.getId(), new Date(123, 1, 1, 0, 0, 0), new Date(123, 12, 31, 23, 59, 59));
         assertThat(results).hasSize(5); // 변경된 코드에 맞게 수정
     }
 
