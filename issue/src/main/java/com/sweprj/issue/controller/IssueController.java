@@ -122,9 +122,6 @@ public class IssueController {
 
     @DeleteMapping("/issues/{issueId}")
     public ResponseEntity<Map<String, Boolean>> deleteIssue(@PathVariable Long issueId) {
-        issueService.deleteIssue(issueId);
-        Map<String,Boolean> m = new HashMap<>();
-        m.put("onSuccess", true);
-        return ResponseEntity.ok(m);
+        return ResponseEntity.ok(issueService.deleteIssue(issueId));
     }
 }
