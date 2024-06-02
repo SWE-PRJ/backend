@@ -82,7 +82,7 @@ public class CommentService {
     private CommentDTO convertToDTO(Comment comment) {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setId(comment.getId());
-        commentDTO.setCommenterId(comment.getCommenter().getUserId());
+        commentDTO.setCommenterIdentifier(comment.getCommenter().getIdentifier());
         commentDTO.setContent(comment.getContent());
         commentDTO.setCommentedAt(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(comment.getCommentedAt()));
         commentDTO.setIssueId(comment.getIssue().getId());

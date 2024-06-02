@@ -1,13 +1,14 @@
 package com.sweprj.issue.controller;
 
-import com.sweprj.issue.DTO.IssueStatisticsDTO;
 import com.sweprj.issue.DTO.*;
 import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
-import com.sweprj.issue.domain.enums.IssuePriority;
-import com.sweprj.issue.exception.InvalidIssuePriorityException;
+import com.sweprj.issue.exception.ResourceNotFoundException;
+import com.sweprj.issue.repository.IssueRepository;
+import com.sweprj.issue.repository.UserRepository;
+import com.sweprj.issue.service.DevRecommendationService;
+import com.sweprj.issue.service.EmbeddingService;
 import com.sweprj.issue.service.IssueService;
-import com.sweprj.issue.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -16,18 +17,25 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api")
 public class IssueController {
 
     private final IssueService issueService;
-    private final UserService userService;
+    private final IssueRepository issueRepository;
+    private final EmbeddingService embeddingService;
+    private final DevRecommendationService recommendationService;
+    private final UserRepository userRepository;
 
-    public IssueController(IssueService issueService, UserService userService) {
+    public IssueController(IssueService issueService, IssueRepository issueRepository, EmbeddingService embeddingService, DevRecommendationService recommendationService, UserRepository userRepository) {
         this.issueService = issueService;
-        this.userService = userService;
+        this.issueRepository = issueRepository;
+        this.embeddingService = embeddingService;
+        this.recommendationService = recommendationService;
+        this.userRepository = userRepository;
     }
 
     //프로젝트에서 이슈 생성 (TESTER)
@@ -45,10 +53,10 @@ public class IssueController {
     }
 
     //유저에게 할당된 이슈 검색 (DEV)
-    @GetMapping("/users/{userId}/issues")
+    @GetMapping("/users/{userIdentifier}/issues")
     @ResponseBody
-    public ResponseEntity<IssueListResponse> browseAssignedIssues(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(issueService.findIssueAssignedTo(userId));
+    public ResponseEntity<IssueListResponse> browseAssignedIssues(@PathVariable("userIdentifier") String userIdentifier) {
+        return ResponseEntity.ok(issueService.findIssueAssignedTo(userIdentifier));
     }
 
     //이슈 상세정보 확인 (PL, DEV, TESTER)
@@ -77,6 +85,8 @@ public class IssueController {
         if (issue == null) {
             return ResponseEntity.notFound().build();
         }
+        User user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier()).get();
+        embeddingService.createIssueEmbedding(issue, user);
         return ResponseEntity.ok(issueService.setIssueAssignee(id, issueAssigneeRequest));
     }
 
@@ -97,5 +107,24 @@ public class IssueController {
             return ResponseEntity.badRequest().build();
         }
 
+    }
+
+    @GetMapping("/issues/{issueId}/recommend")
+    public ResponseEntity<UserRecommendDTO> recommendDeveloper(@PathVariable Long issueId) {
+        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new RuntimeException("Issue not found."));
+        User recommendedUser = recommendationService.recommendDeveloperForIssue(issue);
+        if (recommendedUser == null) {
+            throw new ResourceNotFoundException("No recommended developer found.");
+        }
+        UserRecommendDTO userRecommendDTO = new UserRecommendDTO(recommendedUser.getUserId(), recommendedUser.getUsername());
+        return ResponseEntity.ok(userRecommendDTO);
+    }
+
+    @DeleteMapping("/issues/{issueId}")
+    public ResponseEntity<Map<String, Boolean>> deleteIssue(@PathVariable Long issueId) {
+        issueService.deleteIssue(issueId);
+        Map<String,Boolean> m = new HashMap<>();
+        m.put("onSuccess", true);
+        return ResponseEntity.ok(m);
     }
 }

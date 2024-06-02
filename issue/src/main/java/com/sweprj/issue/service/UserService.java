@@ -1,17 +1,17 @@
 package com.sweprj.issue.service;
 
+import com.sweprj.issue.DTO.UserLogInRequest;
 import com.sweprj.issue.DTO.UserResponse;
+import com.sweprj.issue.DTO.UserSignInRequest;
 import com.sweprj.issue.config.jwt.JwtTokenProvider;
+import com.sweprj.issue.domain.Comment;
+import com.sweprj.issue.domain.Issue;
 import com.sweprj.issue.domain.User;
 import com.sweprj.issue.domain.account.Admin;
 import com.sweprj.issue.domain.account.Developer;
 import com.sweprj.issue.domain.account.ProjectLeader;
 import com.sweprj.issue.domain.account.Tester;
-import com.sweprj.issue.domain.Issue;
-import com.sweprj.issue.domain.Comment;
-import com.sweprj.issue.domain.ProjectUser;
-import com.sweprj.issue.DTO.UserLogInRequest;
-import com.sweprj.issue.DTO.UserSignInRequest;
+import com.sweprj.issue.exception.ResourceNotFoundException;
 import com.sweprj.issue.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -159,14 +159,24 @@ public class UserService implements UserDetailsService {
     // UserService.java
 
     public UserResponse getUserResponse(Long id) {
-        User user = userRepository.findUserByUserId(id);
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getUserId());
-        userResponse.setIdentifier(user.getIdentifier());
-        userResponse.setRole(user.getRole());
-        userResponse.setIssues(user.getAssignedIssues().stream().map(Issue::getId).collect(Collectors.toList()));
-        userResponse.setComments(user.getComments().stream().map(Comment::getId).collect(Collectors.toList()));
-        userResponse.setProjects(user.getProjects().stream().map(ProjectUser::getId).collect(Collectors.toList()));
-        return userResponse;
+        try {
+            User user = userRepository.findUserByUserId(id);
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(user.getUserId());
+            userResponse.setIdentifier(user.getIdentifier());
+            userResponse.setRole(user.getRole());
+            userResponse.setIssues(user.getAssignedIssues().stream().map(Issue::getId).collect(Collectors.toList()));
+            userResponse.setComments(user.getComments().stream().map(Comment::getId).collect(Collectors.toList()));
+            userResponse.setProjects(user.getProjects().stream().map(projectUser -> projectUser.getProject().getId()).collect(Collectors.toList()));
+            return userResponse;
+        } catch (Exception e) {
+            throw new ResourceNotFoundException("User not found");
+        }
+    }
+    public UserResponse getMe() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String token = (String) authentication.getCredentials();
+        Long userId = jwtTokenProvider.getUserFromJwt(token);
+        return getUserResponse(userId);
     }
 }

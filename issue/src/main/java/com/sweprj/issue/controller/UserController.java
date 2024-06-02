@@ -49,4 +49,10 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMe() {
+        UserResponse user = userService.getMe();
+        return ResponseEntity.ok(user);
+    }
+
 }
