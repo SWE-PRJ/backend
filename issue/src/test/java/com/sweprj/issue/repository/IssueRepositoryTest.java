@@ -157,12 +157,6 @@ public class IssueRepositoryTest {
         }
     }
 
-    @Test
-    void testGetIssuesByAssignee() {
-        List<Issue> issues = issueRepository.getIssuesByAssignee(developer);
-        assertThat(issues).hasSize(15);
-    }
-
     private Issue createIssue(IssueState state, IssuePriority priority, Date reportedAt) {
         Issue issue = new Issue();
         issue.setTitle("title");

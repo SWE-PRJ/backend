@@ -58,8 +58,8 @@ public class CommentService {
         return convertToDTO(comment);
     }
     public List<CommentDTO> getAllComments(Long issueId) {
-        Issue issue = issueRepository.findById(issueId).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
-        return convertToDTO(issue.getComments());
+        List<Comment> comments = commentRepository.findByIssueId(issueId).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
+        return convertToDTO(comments);
     }
 
     public CommentDTO updateComment(Long commentId, String content) {
