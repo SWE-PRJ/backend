@@ -172,17 +172,17 @@ public class IssueService {
     public IssueStatisticsDTO getIssueStatistics(Long projectId, Date start, Date end) {
         IssueStatisticsDTO stats = new IssueStatisticsDTO();
 
-        long totalIssues = issueRepository.count();
+        long totalIssues = issueRepository.countAllIssuesWithinDateRange(projectId, start, end);
         stats.setTotalIssues(totalIssues);
 
-        List<Object[]> issuesByState = issueRepository.countIssuesByState(projectId);
+        List<Object[]> issuesByState = issueRepository.countIssuesByState(projectId, start, end);
         Map<String, Long> issuesByStateMap = new HashMap<>();
         for (Object[] row : issuesByState) {
             issuesByStateMap.put(row[0].toString(), (Long) row[1]);
         }
         stats.setIssuesByStatus(issuesByStateMap);
 
-        List<Object[]> issuesByPriority = issueRepository.countIssuesByPriority(projectId);
+        List<Object[]> issuesByPriority = issueRepository.countIssuesByPriority(projectId, start, end);
         Map<String, Long> issuesByPriorityMap = new HashMap<>();
         for (Object[] row : issuesByPriority) {
             issuesByPriorityMap.put(row[0].toString(), (Long) row[1]);
