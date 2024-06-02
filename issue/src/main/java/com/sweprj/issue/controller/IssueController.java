@@ -117,4 +117,8 @@ public class IssueController {
         return ResponseEntity.ok(userRecommendDTO);
     }
 
+    @DeleteMapping("/issues/{issueId}")
+    public void deleteIssue(@PathVariable Long issueId) {
+        issueService.deleteIssue(issueId);
+    }
 }
