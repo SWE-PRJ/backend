@@ -1,7 +1,7 @@
 package com.sweprj.issue.config;
 
-import com.sweprj.issue.config.jwt.CustomJwtAuthenticationEntryPoint;
-import com.sweprj.issue.config.jwt.JwtAuthenticationFilter;
+import com.sweprj.issue.config.jwt.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +21,8 @@ public class SecurityConfig {
 
     private final CustomJwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklist tokenBlacklist;
 
     @Bean   // 특정 HTTP 요청에 대한 웹 기반 보안 구성. (인증인가, 로그인, 로그아웃 설정)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -54,6 +56,16 @@ public class SecurityConfig {
 //                .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
                         .anyRequest().authenticated()
                 )
+                .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    String token = jwtTokenProvider.getTokenFromRequest(request);
+                    if (token != null && jwtTokenProvider.validateToken(token) == JwtValidationType.VALID_JWT) {
+                        tokenBlacklist.add(token);
+                    }
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
+                .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
