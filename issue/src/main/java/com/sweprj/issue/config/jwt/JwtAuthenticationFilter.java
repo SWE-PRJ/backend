@@ -27,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklist tokenBlacklist;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,7 +36,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String token = getTokenFromJwt(request);  // HTTP 요청에서 JWT 토큰 추출
 
             // JWT 토큰 유효성 검사
-            if (jwtTokenProvider.validateToken(token) == JwtValidationType.VALID_JWT) {
+            if (token != null && jwtTokenProvider.validateToken(token) == JwtValidationType.VALID_JWT) {
+                if (tokenBlacklist.contains(token)) {
+                    throw new InvalidTokenException("유효한 JWT 토큰이 없습니다");
+                }
+
                 Long memberId = jwtTokenProvider.getUserFromJwt(token);
                 String role = jwtTokenProvider.getRoleFromJwt(token);
 

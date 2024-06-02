@@ -4,11 +4,13 @@ import com.sweprj.issue.domain.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +52,17 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public String getTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+//        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+//            return bearerToken.substring(7); // "Bearer " 이후의 실제 토큰 값 추출
+//        }
+        return null;
     }
 
     protected SecretKey getSigningKey() { // 서명 키를 생성하는 메서드.
