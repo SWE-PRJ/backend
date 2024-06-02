@@ -189,4 +189,9 @@ public class IssueService {
 
         return stats;
     }
+
+    public void deleteIssue(Long issueId) {
+        Issue issue = findById(issueId);
+        issueRepository.delete(issue);
+    }
 }
