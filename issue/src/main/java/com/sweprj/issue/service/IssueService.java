@@ -93,6 +93,21 @@ public class IssueService {
         return issueListResponse;
     }
 
+    public IssueListResponse findByProjectAndState(Long projectId, String stateString) {
+        Project project = projectRepository.findById(projectId).orElseThrow(()
+                -> new ResourceNotFoundException("User not found"));
+
+        if (!IssueState.isValid(stateString)) {
+            throw new InvalidIssueStateException(stateString + "는 정상적인 state가 아닙니다.");
+        }
+        IssueState state = IssueState.fromString(stateString);
+        List<Issue> issues = issueRepository.getIssuesByProjectAndState(project, state);
+
+        IssueListResponse issueListResponse = new IssueListResponse();
+        issueListResponse.addAllIssues(issues);
+        return issueListResponse;
+    }
+
     //이슈 상세정보 확인 (PL, DEV, TESTER)
     public IssueResponse findDTOById(Long id) {
         Issue issue = findById(id);
