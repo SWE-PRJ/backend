@@ -13,25 +13,29 @@ import java.util.List;
 @Repository
 public interface IssueRepository extends JpaRepository<Issue, Long> {
 
+    // 특정 프로젝트에 속한 이슈 모음
     List<Issue> getIssuesByProject(Project project);
 
+    // project에서 각 state별 이슈의 개수
     @Query("SELECT i.state, COUNT(i) FROM Issue i WHERE i.project.id = :projectId GROUP BY i.state")
     List<Object[]> countIssuesByState(Long projectId);
 
+    // project에서 각 priority별 이슈의 개수
     @Query("SELECT i.priority, COUNT(i) FROM Issue i WHERE i.project.id = :projectId GROUP BY i.priority")
     List<Object[]> countIssuesByPriority(Long projectId);
 
+    // 월별 이슈량
     @Query("SELECT DATE_FORMAT(i.reportedAt, '%Y-%m'), COUNT(i) " +
             "FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate " +
             "GROUP BY DATE_FORMAT(i.reportedAt, '%Y-%m')")
     List<Object[]> countIssuesByMonth(Long projectId, Date startDate, Date endDate);
 
+    // 일별 이슈량
     @Query("SELECT DATE_FORMAT(i.reportedAt, '%Y-%m'), DAY(i.reportedAt), COUNT(i) " +
             "FROM Issue i WHERE i.project.id = :projectId AND i.reportedAt BETWEEN :startDate AND :endDate " +
             "GROUP BY DATE_FORMAT(i.reportedAt, '%Y-%m'), DAY(i.reportedAt)")
     List<Object[]> countIssuesByDayPerMonth(Long projectId, Date startDate, Date endDate);
 
-
-
+    // 특정 개발자에게 할당된 이슈 모음
     List<Issue> getIssuesByAssignee(User user);
 }
