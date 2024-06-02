@@ -53,10 +53,17 @@ public class IssueController {
     }
 
     //유저에게 할당된 이슈 검색 (DEV)
-    @GetMapping("/users/{userIdentifier}/issues")
+    @GetMapping("/projects/{projectId}/developers/{userIdentifier}/issues")
     @ResponseBody
-    public ResponseEntity<IssueListResponse> browseAssignedIssues(@PathVariable("userIdentifier") String userIdentifier) {
-        return ResponseEntity.ok(issueService.findIssueAssignedTo(userIdentifier));
+    public ResponseEntity<IssueListResponse> browseAssignedIssues(@PathVariable("projectId") Long projectId, @PathVariable("userIdentifier") String userIdentifier) {
+        return ResponseEntity.ok(issueService.findIssuesAssignedTo(projectId, userIdentifier));
+    }
+
+    //유저가 제안한 이슈 검색 (TESTER)
+    @GetMapping("/projects/{projectId}/testers/{userIdentifier}/issues")
+    @ResponseBody
+    public ResponseEntity<IssueListResponse> browseReportedIssues(@PathVariable("projectId") Long projectId, @PathVariable("userIdentifier") String userIdentifier) {
+        return ResponseEntity.ok(issueService.findIssuesReportedBy(projectId, userIdentifier));
     }
 
     //이슈 상세정보 확인 (PL, DEV, TESTER)

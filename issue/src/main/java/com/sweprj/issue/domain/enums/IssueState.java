@@ -1,7 +1,7 @@
 package com.sweprj.issue.domain.enums;
 
 public enum IssueState {
-    NEW, ASSIGNED, RESOLVED, CLOSED, REOPENED;
+    NEW, ASSIGNED, FIXED, RESOLVED, CLOSED, REOPENED;
 
     public static IssueState fromString(String state) {
         try {

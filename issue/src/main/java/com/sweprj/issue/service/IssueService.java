@@ -11,10 +11,7 @@ import com.sweprj.issue.exception.InvalidIssuePriorityException;
 import com.sweprj.issue.exception.InvalidIssueStateException;
 import com.sweprj.issue.exception.ResourceNotFoundException;
 import com.sweprj.issue.exception.UnauthorizedException;
-import com.sweprj.issue.repository.IssueRepository;
-import com.sweprj.issue.repository.ProjectRepository;
-import com.sweprj.issue.repository.ProjectUserRepository;
-import com.sweprj.issue.repository.UserRepository;
+import com.sweprj.issue.repository.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,13 +26,15 @@ public class IssueService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final ProjectUserRepository projectUserRepository;
+    private final IssueEmbeddingRepository issueEmbeddingRepository;
 
-    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider, ProjectUserRepository projectUserRepository) {
+    public IssueService(ProjectRepository projectRepository, IssueRepository issueRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider, ProjectUserRepository projectUserRepository, IssueEmbeddingRepository issueEmbeddingRepository) {
         this.projectRepository = projectRepository;
         this.issueRepository = issueRepository;
         this.userRepository = userRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.projectUserRepository = projectUserRepository;
+        this.issueEmbeddingRepository = issueEmbeddingRepository;
     }
 
     private void checkingInProject(Long projectId) {
@@ -116,10 +115,27 @@ public class IssueService {
     }
 
     //할당된 이슈 검색 (DEV)
-    public IssueListResponse findIssueAssignedTo(String userIdentifier) {
+    public IssueListResponse findIssuesAssignedTo(Long projectId, String userIdentifier) {
+        checkingInProject(projectId);
+
         IssueListResponse issueListResponse = new IssueListResponse();
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         User user = userRepository.findByIdentifier(userIdentifier).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<Issue> issues = issueRepository.getIssuesByAssignee(user);
+        List<Issue> issues = issueRepository.getIssuesByProjectAndAssignee(project, user);
+
+        issueListResponse.addAllIssues(issues);
+
+        return issueListResponse;
+    }
+
+    // 제안한 이슈 검색 (TESTER)
+    public IssueListResponse findIssuesReportedBy(Long projectId, String userIdentifier) {
+        checkingInProject(projectId);
+
+        IssueListResponse issueListResponse = new IssueListResponse();
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user = userRepository.findByIdentifier(userIdentifier).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<Issue> issues = issueRepository.getIssuesByProjectAndReporter(project, user);
 
         issueListResponse.addAllIssues(issues);
 
@@ -134,7 +150,7 @@ public class IssueService {
         if (!IssueState.isValid(issueStateRequest.getState())) {
             throw new InvalidIssueStateException(issueStateRequest.getState() + "는 잘못된 이슈 상태입니다.");
         }
-        if (IssueState.RESOLVED == IssueState.fromString(issueStateRequest.getState())) {
+        if (IssueState.FIXED == IssueState.fromString(issueStateRequest.getState())) {
             issue.setFixer(issue.getAssignee());
         }
 
@@ -147,19 +163,14 @@ public class IssueService {
 
     //이슈 할당 (PL)
     public IssueResponse setIssueAssignee(Long id, IssueAssigneeRequest issueAssigneeRequest) {
-        Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier());
         Issue issue = issueRepository.getById(id);
-        checkingInProject(issue.getProject().getId());
         Project project = issue.getProject();
+        checkingInProject(project.getId());
 
+        Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier());
         if (user == null) {
             throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
         }
-
-        if (projectUserRepository.getProjectUserByProjectAndUser(project, user.get()) == null) {
-            throw new ResourceNotFoundException("해당 유저는 해당 이슈가 발생된 프로젝트에 속하지 않았습니다.");
-        }
-
 
         issue.setAssignee(user.get());
         issue.setState(IssueState.ASSIGNED);
@@ -222,9 +233,9 @@ public class IssueService {
         Issue issue = findById(issueId);
         checkingInProject(issue.getProject().getId());
 
-        if (requestUser.getRole() == "ROLE_ADMIN"
-                || requestUser.getRole() == "ROLE_PL"
-                || requestUser == issue.getReporter()) {
+        if (requestUser.getRole() == "ROLE_ADMIN" || requestUser.getRole() == "ROLE_PL" || requestUser == issue.getReporter()) {
+
+            issueEmbeddingRepository.deleteIssueEmbeddingByIssue(issue.getId());
             issueRepository.delete(issue);
 
             Map<String,Boolean> m = new HashMap<>();
