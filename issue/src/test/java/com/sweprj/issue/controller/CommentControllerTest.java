@@ -124,33 +124,33 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.issueId").value(issueId));
     }
 
-//    @Test
-//    public void getComments_validToken_returnsComments() throws Exception {
-//        String token = getAdminToken();
-//        Project project = new Project();
-//        project.setName("Test Project");
-//        projectRepository.save(project);
-//
-//        Issue issue = new Issue();
-//        issue.setTitle("Test Issue");
-//        issue.setProject(project);
-//        issueRepository.save(issue);
-//
-//        Comment comment = new Comment();
-//        comment.setIssue(issue);
-//        comment.setCommenter(userRepository.findByIdentifier("adminTest").orElseThrow());
-//        comment.setContent("Test Comment");
-//        comment.setCommentedAt(new java.util.Date());
-//        commentRepository.save(comment);
-//
-//        Long issueId = issue.getId();
-//
-//        mockMvc.perform(get("/api/issues/" + issueId + "/comments")
-//                        .header("Authorization", "Bearer " + token))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$").isArray())
-//                .andExpect(jsonPath("$[0].issueId").value(issueId));
-//    }
+    @Test
+    public void getComments_validToken_returnsComments() throws Exception {
+        String token = getAdminToken();
+        Project project = new Project();
+        project.setName("Test Project");
+        projectRepository.save(project);
+
+        Issue issue = new Issue();
+        issue.setTitle("Test Issue");
+        issue.setProject(project);
+        issueRepository.save(issue);
+
+        Comment comment = new Comment();
+        comment.setIssue(issue);
+        comment.setCommenter(userRepository.findByIdentifier("adminTest").orElseThrow());
+        comment.setContent("Test Comment");
+        comment.setCommentedAt(new java.util.Date());
+        commentRepository.save(comment);
+
+        Long issueId = issue.getId();
+
+        mockMvc.perform(get("/api/issues/" + issueId + "/comments")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].issueId").value(issueId));
+    }
 
     @Test
     public void updateComment_validToken_updatesComment() throws Exception {
