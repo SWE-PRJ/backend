@@ -21,8 +21,6 @@ public class SecurityConfig {
 
     private final CustomJwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final TokenBlacklist tokenBlacklist;
 
     @Bean   // 특정 HTTP 요청에 대한 웹 기반 보안 구성. (인증인가, 로그인, 로그아웃 설정)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -52,20 +50,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/*/issues").hasAnyRole("ADMIN", "DEV")
                         .requestMatchers(HttpMethod.PATCH, "/api/projects/*/issues/*").hasAnyRole("ADMIN", "PL", "DEV", "TESTER")
                         .requestMatchers(HttpMethod.POST, "/api/issues/*").hasAnyRole("ADMIN", "PL")
+                        .requestMatchers(HttpMethod.POST, "/api/projects/{projectId}/{identifier}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/issues/{issueId}").hasAnyRole("ADMIN","TESTER", "PL")
 //                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
 //                .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
                         .anyRequest().authenticated()
                 )
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    String token = jwtTokenProvider.getTokenFromRequest(request);
-                    if (token != null && jwtTokenProvider.validateToken(token) == JwtValidationType.VALID_JWT) {
-                        tokenBlacklist.add(token);
-                    }
-                    response.setStatus(HttpServletResponse.SC_OK);
-                })
-                .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

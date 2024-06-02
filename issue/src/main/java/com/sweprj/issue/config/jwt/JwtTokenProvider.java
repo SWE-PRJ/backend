@@ -54,17 +54,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-//        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-//            return bearerToken.substring(7); // "Bearer " 이후의 실제 토큰 값 추출
-//        }
-        return null;
-    }
-
     protected SecretKey getSigningKey() { // 서명 키를 생성하는 메서드.
         String encodedKey= Base64.getEncoder().encodeToString(JWT_SECRET.getBytes());
         return Keys.hmacShaKeyFor(encodedKey.getBytes());   // HMAC SHA 알고리즘으로 SecretKey를 생성
