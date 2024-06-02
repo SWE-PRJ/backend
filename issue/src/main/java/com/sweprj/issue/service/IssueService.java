@@ -168,13 +168,16 @@ public class IssueService {
 
     //이슈 할당 (PL)
     public IssueResponse setIssueAssignee(Long id, IssueAssigneeRequest issueAssigneeRequest) {
-        Issue issue = issueRepository.getById(id);
+        Issue issue = issueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Issue not found"));
         Project project = issue.getProject();
         checkingInProject(project.getId());
 
         Optional<User> user = userRepository.findByIdentifier(issueAssigneeRequest.getUserIdentifier());
         if (user == null) {
             throw new ResourceNotFoundException("해당 id를 가진 유저가 없습니다.");
+        }
+        if (user.get() == issue.getAssignee()) {
+            return new IssueResponse(issue);
         }
 
         issue.setAssignee(user.get());
