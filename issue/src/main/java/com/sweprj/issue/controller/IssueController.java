@@ -17,6 +17,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api")
@@ -118,7 +120,10 @@ public class IssueController {
     }
 
     @DeleteMapping("/issues/{issueId}")
-    public void deleteIssue(@PathVariable Long issueId) {
+    public ResponseEntity<Map<String, Boolean>> deleteIssue(@PathVariable Long issueId) {
         issueService.deleteIssue(issueId);
+        Map<String,Boolean> m = new HashMap<>();
+        m.put("onSuccess", true);
+        return ResponseEntity.ok(m);
     }
 }
