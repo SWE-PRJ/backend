@@ -10,6 +10,7 @@ import com.sweprj.issue.domain.enums.IssueState;
 import com.sweprj.issue.exception.InvalidIssuePriorityException;
 import com.sweprj.issue.exception.InvalidIssueStateException;
 import com.sweprj.issue.exception.ResourceNotFoundException;
+import com.sweprj.issue.exception.UnauthorizedException;
 import com.sweprj.issue.repository.IssueRepository;
 import com.sweprj.issue.repository.ProjectRepository;
 import com.sweprj.issue.repository.ProjectUserRepository;
@@ -50,7 +51,7 @@ public class IssueService {
         }
 
         if (projectUserRepository.getProjectUserByProjectAndUser(project, user) == null) {
-            throw new ResourceNotFoundException("해당 유저는 해당 프로젝트에 소속되지 않았습니다.");
+            throw new UnauthorizedException("해당 유저는 해당 프로젝트에 소속되지 않았습니다.");
         }
     }
 
@@ -213,8 +214,24 @@ public class IssueService {
         return stats;
     }
 
-    public void deleteIssue(Long issueId) {
+    public Map<String, Boolean> deleteIssue(Long issueId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String token = (String) authentication.getCredentials();
+        Long userId = jwtTokenProvider.getUserFromJwt(token);
+        User requestUser = userRepository.getReferenceById(userId);
         Issue issue = findById(issueId);
-        issueRepository.delete(issue);
+        checkingInProject(issue.getProject().getId());
+
+        if (requestUser.getRole() == "ROLE_ADMIN"
+                || requestUser.getRole() == "ROLE_PL"
+                || requestUser == issue.getReporter()) {
+            issueRepository.delete(issue);
+
+            Map<String,Boolean> m = new HashMap<>();
+            m.put("onSuccess", true);
+            return m;
+        }
+
+        throw new UnauthorizedException("해당 유저는 해당 이슈 삭제에 대한 권한이 없습니다.");
     }
 }
