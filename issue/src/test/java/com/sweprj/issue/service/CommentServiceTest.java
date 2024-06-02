@@ -101,6 +101,18 @@ public class CommentServiceTest {
     }
 
     @Test
+    public void testCreateCommentFail() {
+        // Given
+        String content = "test content";
+
+        // When
+        CommentDTO comment = commentService.createComment(issueId, content);
+
+        // Then
+        assertThat(comment.getContent()).isNotEqualTo("test");
+    }
+
+    @Test
     public void testGetComment() {
         // Given
         String content = "test content";
@@ -126,6 +138,35 @@ public class CommentServiceTest {
         assertThat(comments.size()).isEqualTo(1);
         assertThat(comments.get(0).getContent()).isEqualTo(content);
     }
+
+    @Test
+    public void testUpdateComment() {
+        // Given
+        String content = "test content";
+        CommentDTO comment = commentService.createComment(issueId, content);
+        String updatedContent = "updated content";
+
+        // When
+        CommentDTO updatedComment = commentService.updateComment(comment.getId(), updatedContent);
+
+        // Then
+        assertThat(updatedComment.getContent()).isEqualTo(updatedContent);
+    }
+
+    @Test
+    public void testDeleteComment() {
+        // Given
+        String content = "test content";
+        CommentDTO comment = commentService.createComment(issueId, content);
+
+        // When
+        commentService.deleteComment(comment.getId());
+
+        // Then
+        assertThat(commentRepository.findById(comment.getId())).isEmpty();
+    }
+
+
 
     private void authenticate() {
         Long memberId = jwtTokenProvider.getUserFromJwt(authToken);
